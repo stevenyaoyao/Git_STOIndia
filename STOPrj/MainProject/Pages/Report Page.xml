@@ -1,0 +1,591 @@
+<?xml version="1.0"?>
+<Page Version="4000" TimeStamp="2017-10-18 02:41:40">
+	<PageEditSize Type="Inherited" />
+	<ProjectUUID>E84847FF-905F-4123-AFB1-4D6412EC0322</ProjectUUID>
+	<TemplatesTabOrderPosition>1</TemplatesTabOrderPosition>
+	<Background Inherited="true" />
+	<PageObject Type="Text">
+		<Location top="90" left="18" bottom="120" right="204" />
+		<StaticText>Daily Inventory Report</StaticText>
+		<Font GUID="AD2A233D-E6C9-4BB2-87A9-72852CA2B19B" Name="Title" />
+		<TextColor RGB="#80ff80" />
+	</PageObject>
+	<PageObject Type="Text">
+		<Location top="408" left="18" bottom="444" right="228" />
+		<StaticText>Analysis of Sales</StaticText>
+		<Font GUID="AD2A233D-E6C9-4BB2-87A9-72852CA2B19B" Name="Title" />
+		<TextColor RGB="#80ff80" />
+	</PageObject>
+	<PageObject Type="Text">
+		<Location top="606" left="18" bottom="642" right="228" />
+		<StaticText>Analysis of STO</StaticText>
+		<Font GUID="AD2A233D-E6C9-4BB2-87A9-72852CA2B19B" Name="Title" />
+		<TextColor RGB="#80ff80" />
+	</PageObject>
+	<PageObject Type="Scalar">
+		<Location top="84" left="204" bottom="120" right="294" />
+		<TabOrder>4</TabOrder>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<BackgroundColor RGB="#ffffff" />
+		<Layout>Text-Value</Layout>
+		<SeparatorSign>=</SeparatorSign>
+		<ExplicitIdentifier>
+			<Identifier>P_CurrentTime</Identifier>
+			<NumberFormat Width="15" Decimals="0" Alignment="Left" ShowDefaults="true" />
+		</ExplicitIdentifier>
+	</PageObject>
+	<PageObject Type="Pivot Table">
+		<Location top="120" left="18" bottom="258" right="1410" />
+		<TabOrder>2</TabOrder>
+		<ObjectUUID>6D8C6A12-9573-4E3D-A639-B8E6C96447F9</ObjectUUID>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<Contents>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_DisplayDescriptionNew( dcd, SKU )</Identifier>
+				<Title ID="4120">"Description"</Title>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_AvailableStockNew( dcd, SKU )</Identifier>
+				<Title ID="4120">"Unrestricted Qty"</Title>
+				<Format>
+					<Decimal_Places ID="4312">0</Decimal_Places>
+					<Show_1000_seperator ID="4313">"Yes"</Show_1000_seperator>
+				</Format>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_StockInTransitNew( dcd, SKU )</Identifier>
+				<Title ID="4120">"Qty in Transit"</Title>
+				<Format>
+					<Decimal_Places ID="4312">0</Decimal_Places>
+					<Show_1000_seperator ID="4313">"Yes"</Show_1000_seperator>
+				</Format>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_StockInSTONew( dcd, SKU )</Identifier>
+				<Title ID="4120">"Qty in STO"</Title>
+				<Format>
+					<Decimal_Places ID="4312">0</Decimal_Places>
+					<Show_1000_seperator ID="4313">"Yes"</Show_1000_seperator>
+				</Format>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_StockPendingCheckingNew( dcd, SKU )</Identifier>
+				<Title ID="4120">"Inspection Qty"</Title>
+				<Format>
+					<Decimal_Places ID="4312">0</Decimal_Places>
+					<Show_1000_seperator ID="4313">"Yes"</Show_1000_seperator>
+				</Format>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_DisplaySalesOrderSAPNew( dcd, SKU )</Identifier>
+				<Title ID="4120">"Sales Order (SAP)"</Title>
+				<Format>
+					<Decimal_Places ID="4312">0</Decimal_Places>
+					<Show_1000_seperator ID="4313">"Yes"</Show_1000_seperator>
+				</Format>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_DisplayDeliverQtyNew( dcd, SKU )</Identifier>
+				<Title ID="4120">"Delivered Qty"</Title>
+				<Format>
+					<Decimal_Places ID="4312">0</Decimal_Places>
+					<Show_1000_seperator ID="4313">"Yes"</Show_1000_seperator>
+				</Format>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_DisplayUnDeliveredQtyNew( dcd, SKU )</Identifier>
+				<Title ID="4120">"Undelivered Qty"</Title>
+				<Format>
+					<Decimal_Places ID="4312">0</Decimal_Places>
+					<Show_1000_seperator ID="4313">"Yes"</Show_1000_seperator>
+				</Format>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_DisplayTMLandingLag( dcd, SKU )</Identifier>
+				<Title ID="4120">"TM/Landing/La-3 FCST"</Title>
+				<Format>
+					<Decimal_Places ID="4312">0</Decimal_Places>
+					<Show_1000_seperator ID="4313">"Yes"</Show_1000_seperator>
+				</Format>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_DisplayToOrder( dcd, SKU )</Identifier>
+				<Title ID="4120">"To Order"</Title>
+				<Format>
+					<Decimal_Places ID="4312">0</Decimal_Places>
+					<Show_1000_seperator ID="4313">"Yes"</Show_1000_seperator>
+				</Format>
+				<Tooltip_Text ID="4125">P_OverSold( dcd, SKU )</Tooltip_Text>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_DisplayLag3FCSTMPlus1( dcd, SKU )</Identifier>
+				<Title ID="4120">"Lag3 FCST M+1"</Title>
+				<Format>
+					<Decimal_Places ID="4312">0</Decimal_Places>
+					<Show_1000_seperator ID="4313">"Yes"</Show_1000_seperator>
+				</Format>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_DisplayCoverageDaysUnres( dcd, SKU )</Identifier>
+				<Title ID="4120">"Coverage (Unres)"</Title>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_DisplayCoverageDaysAll( dcd, SKU )</Identifier>
+				<Title ID="4120">"Coverage (All)"</Title>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_DisplayAlert1( dcd, SKU )</Identifier>
+				<Title ID="4120">"Alert 1"</Title>
+				<Colors>
+					<Background_Color ID="4160">P_DisplayColor1( dcd, SKU )</Background_Color>
+				</Colors>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_DisplayAlert2( dcd, SKU )</Identifier>
+				<Title ID="4120">"Alert 2"</Title>
+				<Colors>
+					<Background_Color ID="4160">P_DisplayColor2( dcd, SKU )</Background_Color>
+				</Colors>
+			</Explicit_Identifier>
+		</Contents>
+		<Indices>
+			<Explicit_Index>
+				<Index ID="6510">dcd</Index>
+				<Header_Title ID="6530">"DC Division"</Header_Title>
+			</Explicit_Index>
+			<Identifier_Index>
+				<Header_Title ID="6230">""</Header_Title>
+				<Hide_if_Single_Identifier ID="6270">"No"</Hide_if_Single_Identifier>
+			</Identifier_Index>
+		</Indices>
+		<General>
+			<Dense_Aggregation_restricts_to_Domain ID="1022">"Yes"</Dense_Aggregation_restricts_to_Domain>
+		</General>
+		<Row_Area>
+			<Background_Color ID="2010">RGB&lt;255,255,200&gt;</Background_Color>
+			<Text_Color ExtraInfo="D4F48705-BFDF-4DF8-8E1F-D38EFF981024" ID="2020">"default selection"</Text_Color>
+			<Headers>
+				<Background_Color ExtraInfo="D4F48705-BFDF-4DF8-8E1F-D38EFF981024" ID="2120">"default selection"</Background_Color>
+				<Text_Color ID="2130">RGB&lt;255,255,255&gt;</Text_Color>
+				<Show_Sub_Headers ID="2150">"No"</Show_Sub_Headers>
+			</Headers>
+			<Grid_Focus_Indicator>
+				<Background_Color ID="2270">RGB&lt;0,0,168&gt;</Background_Color>
+				<Text_Color ID="2280">RGB&lt;255,255,200&gt;</Text_Color>
+			</Grid_Focus_Indicator>
+		</Row_Area>
+		<Column_Area>
+			<Headers>
+				<Show_Sub_Headers ID="3150">"No"</Show_Sub_Headers>
+			</Headers>
+		</Column_Area>
+		<Grid_Area>
+			<Background_Color ID="5010">RGB&lt;255,255,255&gt;</Background_Color>
+			<Alternating_Background_Color ID="5011">RGB&lt;225,225,225&gt;</Alternating_Background_Color>
+			<Aggregators>
+				<Background_Color ID="5220">RGB&lt;255,128,128&gt;</Background_Color>
+			</Aggregators>
+			<Sub_Header_Row_or_Column>
+				<Background_Color ID="5320">RGB&lt;255,255,200&gt;</Background_Color>
+			</Sub_Header_Row_or_Column>
+		</Grid_Area>
+	</PageObject>
+	<PageObject Type="Selection Object">
+		<SelectionType>DropDownList</SelectionType>
+		<Location top="408" left="252" bottom="438" right="360" />
+		<TabOrder>8</TabOrder>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main" />
+		<TextShown>ElementName</TextShown>
+		<Border Style="None" />
+		<BackgroundColor RGB="#ffffff" />
+		<ProcedureUponChange>AOSDisplay</ProcedureUponChange>
+		<ExplicitIdentifier>
+			<Identifier>P_DisplayStartDate1</Identifier>
+		</ExplicitIdentifier>
+	</PageObject>
+	<PageObject Type="Text">
+		<Location top="408" left="162" bottom="438" right="270" />
+		<StaticText>From Date</StaticText>
+		<Font GUID="6862C826-4789-416E-B615-6DFEB5D23AD5" Name="SubTitle" />
+		<TextColor RGB="#ffff00" />
+	</PageObject>
+	<PageObject Type="Selection Object">
+		<SelectionType>DropDownList</SelectionType>
+		<Location top="408" left="474" bottom="438" right="582" />
+		<TabOrder>5</TabOrder>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main" />
+		<TextShown>ElementName</TextShown>
+		<Border Style="None" />
+		<BackgroundColor RGB="#ffffff" />
+		<ProcedureUponChange>AOSDisplay</ProcedureUponChange>
+		<ExplicitIdentifier>
+			<Identifier>P_DisplayEndDate1</Identifier>
+		</ExplicitIdentifier>
+	</PageObject>
+	<PageObject Type="Text">
+		<Location top="408" left="402" bottom="438" right="510" />
+		<StaticText>To Date</StaticText>
+		<Font GUID="6862C826-4789-416E-B615-6DFEB5D23AD5" Name="SubTitle" />
+		<TextColor RGB="#ffff00" />
+	</PageObject>
+	<PageObject Type="Selection Object">
+		<SelectionType>DropDownList</SelectionType>
+		<Location top="408" left="792" bottom="438" right="900" />
+		<TabOrder>7</TabOrder>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main" />
+		<TextShown>ElementName</TextShown>
+		<Border Style="None" />
+		<BackgroundColor RGB="#ffffff" />
+		<ProcedureUponChange>AOSDisplay</ProcedureUponChange>
+		<ExplicitIdentifier>
+			<Identifier>P_ReportSelectedSKUCategory</Identifier>
+		</ExplicitIdentifier>
+	</PageObject>
+	<PageObject Type="Text">
+		<Location top="408" left="618" bottom="438" right="792" />
+		<StaticText>Select SKU Category</StaticText>
+		<Font GUID="6862C826-4789-416E-B615-6DFEB5D23AD5" Name="SubTitle" />
+		<TextColor RGB="#ffff00" />
+	</PageObject>
+	<PageObject Type="Pivot Table">
+		<Location top="438" left="18" bottom="594" right="1410" />
+		<TabOrder>11</TabOrder>
+		<ObjectUUID>544B7BA4-FFCC-4720-82A4-66DC83426B12</ObjectUUID>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<Contents>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_DisplaySKUDescription3( SKU )</Identifier>
+				<Title ID="4120">"Description"</Title>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_DisplaySkuPlant( SKU )</Identifier>
+				<Title ID="4120">"Manufactory"</Title>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_DisplaySkuDCPercentageInAOS( SKU, DC )</Identifier>
+				<Title ID="4120">"DC Percentage %"</Title>
+				<Format>
+					<Decimal_Places ID="4312">2</Decimal_Places>
+				</Format>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_DisplaySkuWeekPercentageInAOS( SKU, w )</Identifier>
+				<Title ID="4120">"Week Percentage %"</Title>
+				<Format>
+					<Decimal_Places ID="4312">2</Decimal_Places>
+				</Format>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_DisplaySkuRegionPercentageInAOS( SKU, re )</Identifier>
+				<Title ID="4120">"Region Percentage %"</Title>
+				<Format>
+					<Decimal_Places ID="4312">2</Decimal_Places>
+				</Format>
+			</Explicit_Identifier>
+		</Contents>
+		<Indices>
+			<Explicit_Index>
+				<Index ID="6510">w</Index>
+				<Header_Title ID="6530">"Week"</Header_Title>
+			</Explicit_Index>
+			<Explicit_Index>
+				<Index ID="6510">re</Index>
+				<Header_Title ID="6530">"Region"</Header_Title>
+			</Explicit_Index>
+			<Identifier_Index>
+				<Header_Title ID="6230">""</Header_Title>
+				<Hide_if_Single_Identifier ID="6270">"No"</Hide_if_Single_Identifier>
+			</Identifier_Index>
+		</Indices>
+		<General>
+			<Dense_Aggregation_restricts_to_Domain ID="1022">"Yes"</Dense_Aggregation_restricts_to_Domain>
+		</General>
+		<Row_Area>
+			<Background_Color ID="2010">RGB&lt;255,255,200&gt;</Background_Color>
+			<Text_Color ExtraInfo="D4F48705-BFDF-4DF8-8E1F-D38EFF981024" ID="2020">"default selection"</Text_Color>
+			<Headers>
+				<Background_Color ExtraInfo="D4F48705-BFDF-4DF8-8E1F-D38EFF981024" ID="2120">"default selection"</Background_Color>
+				<Text_Color ID="2130">RGB&lt;255,255,255&gt;</Text_Color>
+				<Show_Sub_Headers ID="2150">"No"</Show_Sub_Headers>
+			</Headers>
+			<Grid_Focus_Indicator>
+				<Background_Color ID="2270">RGB&lt;0,0,168&gt;</Background_Color>
+				<Text_Color ID="2280">RGB&lt;255,255,200&gt;</Text_Color>
+			</Grid_Focus_Indicator>
+		</Row_Area>
+		<Column_Area>
+			<Auto_resize_Column_Widths ID="3006">"Upon all data changes"</Auto_resize_Column_Widths>
+			<Headers>
+				<Show_Sub_Headers ID="3150">"No"</Show_Sub_Headers>
+			</Headers>
+		</Column_Area>
+		<Grid_Area>
+			<Background_Color ID="5010">RGB&lt;255,255,255&gt;</Background_Color>
+			<Alternating_Background_Color ID="5011">RGB&lt;225,225,225&gt;</Alternating_Background_Color>
+			<Aggregators>
+				<Background_Color ID="5220">RGB&lt;255,128,128&gt;</Background_Color>
+			</Aggregators>
+			<Sub_Header_Row_or_Column>
+				<Background_Color ID="5320">RGB&lt;255,255,200&gt;</Background_Color>
+			</Sub_Header_Row_or_Column>
+		</Grid_Area>
+	</PageObject>
+	<PageObject Type="Selection Object">
+		<SelectionType>DropDownList</SelectionType>
+		<Location top="606" left="252" bottom="636" right="360" />
+		<TabOrder>9</TabOrder>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main" />
+		<TextShown>ElementName</TextShown>
+		<Border Style="None" />
+		<BackgroundColor RGB="#ffffff" />
+		<ProcedureUponChange>AOSTODisplay</ProcedureUponChange>
+		<ExplicitIdentifier>
+			<Identifier>P_DisplayStartDate2</Identifier>
+		</ExplicitIdentifier>
+	</PageObject>
+	<PageObject Type="Text">
+		<Location top="606" left="162" bottom="636" right="270" />
+		<StaticText>From Date</StaticText>
+		<Font GUID="6862C826-4789-416E-B615-6DFEB5D23AD5" Name="SubTitle" />
+		<TextColor RGB="#ffff00" />
+	</PageObject>
+	<PageObject Type="Selection Object">
+		<SelectionType>DropDownList</SelectionType>
+		<Location top="606" left="474" bottom="636" right="582" />
+		<TabOrder>6</TabOrder>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main" />
+		<TextShown>ElementName</TextShown>
+		<Border Style="None" />
+		<BackgroundColor RGB="#ffffff" />
+		<ProcedureUponChange>AOSTODisplay</ProcedureUponChange>
+		<ExplicitIdentifier>
+			<Identifier>P_DisplayEndDate2</Identifier>
+		</ExplicitIdentifier>
+	</PageObject>
+	<PageObject Type="Text">
+		<Location top="606" left="402" bottom="636" right="510" />
+		<StaticText>To Date</StaticText>
+		<Font GUID="6862C826-4789-416E-B615-6DFEB5D23AD5" Name="SubTitle" />
+		<TextColor RGB="#ffff00" />
+	</PageObject>
+	<PageObject Type="Pivot Table">
+		<Location top="636" left="18" bottom="792" right="1410" />
+		<TabOrder>10</TabOrder>
+		<ObjectUUID>FC449349-DEAD-45A5-B25E-3483475AEAE6</ObjectUUID>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<Contents>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_DisplaySKUDescription22( SKU )</Identifier>
+				<Title ID="4120">"Description"</Title>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_DisplaySkuPlant22( SKU )</Identifier>
+				<Title ID="4120">"Manufactory"</Title>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_DisplaySkuDCQty( SKU, dcd )</Identifier>
+				<Title ID="4120">"STO Quantity"</Title>
+				<Format>
+					<Decimal_Places ID="4312">0</Decimal_Places>
+					<Show_1000_seperator ID="4313">"Yes"</Show_1000_seperator>
+				</Format>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_DisplayFrequencySkuDC( SKU, dcd )</Identifier>
+				<Title ID="4120">"STO Frequency"</Title>
+			</Explicit_Identifier>
+		</Contents>
+		<Indices>
+			<Explicit_Index>
+				<Index ID="6510">w</Index>
+				<Header_Title ID="6530">"Week"</Header_Title>
+			</Explicit_Index>
+			<Explicit_Index>
+				<Index ID="6510">dcd</Index>
+				<Header_Title ID="6530">"DCDivision"</Header_Title>
+			</Explicit_Index>
+			<Identifier_Index>
+				<Header_Title ID="6230">""</Header_Title>
+				<Hide_if_Single_Identifier ID="6270">"No"</Hide_if_Single_Identifier>
+			</Identifier_Index>
+		</Indices>
+		<General>
+			<Dense_Aggregation_restricts_to_Domain ID="1022">"Yes"</Dense_Aggregation_restricts_to_Domain>
+		</General>
+		<Row_Area>
+			<Background_Color ID="2010">RGB&lt;255,255,200&gt;</Background_Color>
+			<Text_Color ExtraInfo="D4F48705-BFDF-4DF8-8E1F-D38EFF981024" ID="2020">"default selection"</Text_Color>
+			<Headers>
+				<Background_Color ExtraInfo="D4F48705-BFDF-4DF8-8E1F-D38EFF981024" ID="2120">"default selection"</Background_Color>
+				<Text_Color ID="2130">RGB&lt;255,255,255&gt;</Text_Color>
+				<Show_Sub_Headers ID="2150">"No"</Show_Sub_Headers>
+			</Headers>
+			<Grid_Focus_Indicator>
+				<Background_Color ID="2270">RGB&lt;0,0,168&gt;</Background_Color>
+				<Text_Color ID="2280">RGB&lt;255,255,200&gt;</Text_Color>
+			</Grid_Focus_Indicator>
+		</Row_Area>
+		<Column_Area>
+			<Auto_resize_Column_Widths ID="3006">"Upon all data changes"</Auto_resize_Column_Widths>
+			<Headers>
+				<Show_Sub_Headers ID="3150">"No"</Show_Sub_Headers>
+			</Headers>
+		</Column_Area>
+		<Grid_Area>
+			<Background_Color ID="5010">RGB&lt;255,255,255&gt;</Background_Color>
+			<Alternating_Background_Color ID="5011">RGB&lt;225,225,225&gt;</Alternating_Background_Color>
+			<Aggregators>
+				<Background_Color ID="5220">RGB&lt;255,128,128&gt;</Background_Color>
+			</Aggregators>
+			<Sub_Header_Row_or_Column>
+				<Background_Color ID="5320">RGB&lt;255,255,200&gt;</Background_Color>
+			</Sub_Header_Row_or_Column>
+		</Grid_Area>
+	</PageObject>
+	<PageObject Type="Pivot Table">
+		<Location top="258" left="18" bottom="396" right="1410" />
+		<TabOrder>3</TabOrder>
+		<ObjectUUID>F751146E-E4B4-4177-88CB-D8EDE6A4B1E0</ObjectUUID>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<Contents>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_DisplayPlantSKUDescription( pl, SKU )</Identifier>
+				<Title ID="4120">"Description"</Title>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_PlantAvailableStockNew( pl, SKU )</Identifier>
+				<Title ID="4120">"Unrestricted Qty"</Title>
+				<Format>
+					<Decimal_Places ID="4312">0</Decimal_Places>
+					<Show_1000_seperator ID="4313">"Yes"</Show_1000_seperator>
+				</Format>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_PlantSTONew( pl, SKU )</Identifier>
+				<Title ID="4120">"Qty in STO"</Title>
+				<Format>
+					<Decimal_Places ID="4312">0</Decimal_Places>
+					<Show_1000_seperator ID="4313">"Yes"</Show_1000_seperator>
+				</Format>
+			</Explicit_Identifier>
+			<Explicit_Identifier>
+				<Identifier ID="4110">P_PlantInspectionStockNew( pl, SKU )</Identifier>
+				<Title ID="4120">"Inspection Qty"</Title>
+				<Format>
+					<Decimal_Places ID="4312">0</Decimal_Places>
+					<Show_1000_seperator ID="4313">"Yes"</Show_1000_seperator>
+				</Format>
+			</Explicit_Identifier>
+		</Contents>
+		<Indices>
+			<Explicit_Index>
+				<Index ID="6510">pl</Index>
+				<Header_Title ID="6530">"Plant"</Header_Title>
+			</Explicit_Index>
+			<Identifier_Index>
+				<Header_Title ID="6230">""</Header_Title>
+				<Hide_if_Single_Identifier ID="6270">"No"</Hide_if_Single_Identifier>
+			</Identifier_Index>
+		</Indices>
+		<General>
+			<Dense_Aggregation_restricts_to_Domain ID="1022">"Yes"</Dense_Aggregation_restricts_to_Domain>
+		</General>
+		<Row_Area>
+			<Background_Color ID="2010">RGB&lt;255,255,200&gt;</Background_Color>
+			<Text_Color ExtraInfo="D4F48705-BFDF-4DF8-8E1F-D38EFF981024" ID="2020">"default selection"</Text_Color>
+			<Headers>
+				<Background_Color ExtraInfo="D4F48705-BFDF-4DF8-8E1F-D38EFF981024" ID="2120">"default selection"</Background_Color>
+				<Text_Color ID="2130">RGB&lt;255,255,255&gt;</Text_Color>
+				<Show_Sub_Headers ID="2150">"No"</Show_Sub_Headers>
+			</Headers>
+			<Grid_Focus_Indicator>
+				<Background_Color ID="2270">RGB&lt;0,0,168&gt;</Background_Color>
+				<Text_Color ID="2280">RGB&lt;255,255,200&gt;</Text_Color>
+			</Grid_Focus_Indicator>
+		</Row_Area>
+		<Column_Area>
+			<Headers>
+				<Show_Sub_Headers ID="3150">"No"</Show_Sub_Headers>
+			</Headers>
+		</Column_Area>
+		<Grid_Area>
+			<Background_Color ID="5010">RGB&lt;255,255,255&gt;</Background_Color>
+			<Alternating_Background_Color ID="5011">RGB&lt;225,225,225&gt;</Alternating_Background_Color>
+			<Aggregators>
+				<Background_Color ID="5220">RGB&lt;255,128,128&gt;</Background_Color>
+			</Aggregators>
+			<Sub_Header_Row_or_Column>
+				<Background_Color ID="5320">RGB&lt;255,255,200&gt;</Background_Color>
+			</Sub_Header_Row_or_Column>
+		</Grid_Area>
+	</PageObject>
+	<PageObject Type="Button">
+		<Location top="84" left="324" bottom="114" right="426" />
+		<TabOrder>19</TabOrder>
+		<LeaveOnEnter>false</LeaveOnEnter>
+		<ButtonType>Text</ButtonType>
+		<Title>"Configure"</Title>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main" />
+		<ActionSequence>
+			<Action Type="LinkedPage">
+				<Page PageGUID="26928B83-B89D-453D-825A-F88DFB6566D6" Name="DailyInventoryReportConfigPage" />
+			</Action>
+		</ActionSequence>
+	</PageObject>
+	<UsedReferences>
+		<Model>
+			<Symbol>Cal_Days</Symbol>
+			<Symbol>S_SKUCategory</Symbol>
+			<Symbol>P_AvailableStockNew</Symbol>
+			<Symbol>P_StockPendingCheckingNew</Symbol>
+			<Symbol>P_StockInTransitNew</Symbol>
+			<Symbol>P_PlantAvailableStockNew</Symbol>
+			<Symbol>P_PlantInspectionStockNew</Symbol>
+			<Symbol>P_StockInSTONew</Symbol>
+			<Symbol>P_CurrentTime</Symbol>
+			<Symbol>P_DisplayDescriptionNew</Symbol>
+			<Symbol>P_DisplaySalesOrderSAPNew</Symbol>
+			<Symbol>P_DisplayDeliverQtyNew</Symbol>
+			<Symbol>P_DisplayUnDeliveredQtyNew</Symbol>
+			<Symbol>P_DisplayPlantSKUDescription</Symbol>
+			<Symbol>P_PlantSTONew</Symbol>
+			<Symbol>P_DisplayTMLandingLag</Symbol>
+			<Symbol>P_DisplayToOrder</Symbol>
+			<Symbol>P_OverSold</Symbol>
+			<Symbol>P_DisplayLag3FCSTMPlus1</Symbol>
+			<Symbol>P_DisplayCoverageDaysUnres</Symbol>
+			<Symbol>P_DisplayCoverageDaysAll</Symbol>
+			<Symbol>P_DisplayAlert1</Symbol>
+			<Symbol>P_DisplayColor1</Symbol>
+			<Symbol>P_DisplayAlert2</Symbol>
+			<Symbol>P_DisplayColor2</Symbol>
+			<Symbol>P_DisplayStartDate1</Symbol>
+			<Symbol>P_DisplayEndDate1</Symbol>
+			<Symbol>P_ReportSelectedSKUCategory</Symbol>
+			<Symbol>P_DisplaySkuDCPercentageInAOS</Symbol>
+			<Symbol>P_DisplaySkuPlant</Symbol>
+			<Symbol>P_DisplaySKUDescription3</Symbol>
+			<Symbol>P_DisplaySkuWeekPercentageInAOS</Symbol>
+			<Symbol>P_DisplaySkuRegionPercentageInAOS</Symbol>
+			<Symbol>P_DisplayStartDate2</Symbol>
+			<Symbol>P_DisplayEndDate2</Symbol>
+			<Symbol>P_DisplaySKUDescription22</Symbol>
+			<Symbol>P_DisplaySkuPlant22</Symbol>
+			<Symbol>P_DisplaySkuDCQty</Symbol>
+			<Symbol>P_DisplayFrequencySkuDC</Symbol>
+			<Symbol>AOSDisplay</Symbol>
+			<Symbol>AOSTODisplay</Symbol>
+			<Symbol>w</Symbol>
+			<Symbol>SKU</Symbol>
+			<Symbol>re</Symbol>
+			<Symbol>DC</Symbol>
+			<Symbol>dcd</Symbol>
+			<Symbol>pl</Symbol>
+		</Model>
+	</UsedReferences>
+</Page>

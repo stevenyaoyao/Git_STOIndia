@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+<Page Version="4000" TimeStamp="2017-10-18 03:28:36">
+	<PageEditSize Type="Specified">
+		<Size Width="700" Height="330" />
+	</PageEditSize>
+	<ProjectUUID>E84847FF-905F-4123-AFB1-4D6412EC0322</ProjectUUID>
+	<Title>"Daily Inventory Report Configuration"</Title>
+	<DockAlways>true</DockAlways>
+	<TemplatesTabOrderPosition>1</TemplatesTabOrderPosition>
+	<Background Inherited="true" />
+	<PageObject Type="Button">
+		<Location top="252" left="168" bottom="312" right="318" />
+		<TabOrder>3</TabOrder>
+		<LeaveOnEnter>false</LeaveOnEnter>
+		<ButtonType>Text</ButtonType>
+		<Title>"Save"</Title>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main" />
+	</PageObject>
+	<PageObject Type="Button">
+		<Location top="252" left="357" bottom="312" right="507" />
+		<TabOrder>1</TabOrder>
+		<LeaveOnEnter>false</LeaveOnEnter>
+		<ButtonType>Text</ButtonType>
+		<Title>"Save and Regenerate Alert1"</Title>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main" />
+		<ActionSequence>
+			<Action Type="ClosePage" />
+			<Action Type="Run">
+				<RunWhat>SpecificProcecure</RunWhat>
+				<Procedure>ConfigureRun</Procedure>
+				<AbortOnError>true</AbortOnError>
+			</Action>
+		</ActionSequence>
+	</PageObject>
+	<PageObject Type="Button">
+		<Location top="252" left="546" bottom="312" right="696" />
+		<TabOrder>2</TabOrder>
+		<LeaveOnEnter>false</LeaveOnEnter>
+		<ButtonType>Text</ButtonType>
+		<Title>"Cancel and Exit"</Title>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main" />
+		<ActionSequence>
+			<Action Type="ClosePage" />
+			<Action Type="Run">
+				<RunWhat>SpecificProcecure</RunWhat>
+				<Procedure>ConfigureCancel</Procedure>
+				<AbortOnError>true</AbortOnError>
+			</Action>
+		</ActionSequence>
+	</PageObject>
+	<PageObject Type="Scalar">
+		<Location top="96" left="246" bottom="132" right="312" />
+		<TabOrder>4</TabOrder>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<BackgroundColor RGB="#ffffff" />
+		<Layout>Value</Layout>
+		<SeparatorSign>=</SeparatorSign>
+		<ExplicitIdentifier>
+			<Identifier>P_DisplayPercentage2</Identifier>
+			<NumberFormat Width="5" Decimals="2" Scientific="IfTooSmallorLarge" Alignment="Center" ShowDefaults="true" />
+		</ExplicitIdentifier>
+	</PageObject>
+	<PageObject Type="Scalar">
+		<Location top="156" left="246" bottom="192" right="312" />
+		<TabOrder>6</TabOrder>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<BackgroundColor RGB="#ffffff" />
+		<Layout>Value</Layout>
+		<SeparatorSign>=</SeparatorSign>
+		<ExplicitIdentifier>
+			<Identifier>P_DisplayPercentage3</Identifier>
+			<NumberFormat Width="5" Decimals="2" Scientific="IfTooSmallorLarge" Alignment="Center" ShowDefaults="true" />
+		</ExplicitIdentifier>
+	</PageObject>
+	<PageObject Type="Scalar">
+		<Location top="36" left="246" bottom="72" right="312" />
+		<TabOrder>5</TabOrder>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<BackgroundColor RGB="#ffffff" />
+		<Layout>Value</Layout>
+		<SeparatorSign>=</SeparatorSign>
+		<ExplicitIdentifier>
+			<Identifier>P_DisplayPercentage1</Identifier>
+			<NumberFormat Width="5" Decimals="2" Scientific="IfTooSmallorLarge" Alignment="Center" ShowDefaults="true" />
+		</ExplicitIdentifier>
+	</PageObject>
+	<PageObject Type="Text">
+		<Location top="42" left="126" bottom="72" right="240" />
+		<StaticText>Percentage 1</StaticText>
+		<Font GUID="AD2A233D-E6C9-4BB2-87A9-72852CA2B19B" Name="Title" />
+		<TextColor RGB="#000000" />
+	</PageObject>
+	<PageObject Type="Text">
+		<Location top="102" left="126" bottom="132" right="240" />
+		<StaticText>Percentage 2</StaticText>
+		<Font GUID="AD2A233D-E6C9-4BB2-87A9-72852CA2B19B" Name="Title" />
+		<TextColor RGB="#000000" />
+	</PageObject>
+	<PageObject Type="Text">
+		<Location top="162" left="126" bottom="192" right="240" />
+		<StaticText>Percentage 3</StaticText>
+		<Font GUID="AD2A233D-E6C9-4BB2-87A9-72852CA2B19B" Name="Title" />
+		<TextColor RGB="#000000" />
+	</PageObject>
+	<UsedReferences>
+		<Model>
+			<Symbol>P_DisplayPercentage1</Symbol>
+			<Symbol>P_DisplayPercentage2</Symbol>
+			<Symbol>P_DisplayPercentage3</Symbol>
+			<Symbol>ConfigureRun</Symbol>
+			<Symbol>ConfigureCancel</Symbol>
+		</Model>
+	</UsedReferences>
+</Page>

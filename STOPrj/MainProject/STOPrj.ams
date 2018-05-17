@@ -1,0 +1,3393 @@
+## ams_version=1.0
+
+Model Main_STOPrj {
+    Section CommonSetSection {
+        DeclarationSection CommonSetDeclaration {
+            Calendar Cal_Days {
+                Index: day, day1;
+                Unit: day;
+                BeginDate: P_CalendarStartDate;
+                EndDate: P_CalendarEndDate;
+                TimeslotFormat: "%m/%d/%c%y";
+                Comment: {
+                    "\"%m/%d/%c%y\"
+                    \"%c%y-%m-%d\""
+                }
+            }
+            Calendar Cal_Months {
+                Index: mon;
+                Unit: month;
+                BeginDate: P_CalendarStartDate;
+                EndDate: P_CalendarEndDate;
+                TimeslotFormat: "%m/%c%y";
+                Comment: {
+                    "\"%c%y-%m\"
+                    \"%m/%c%y\""
+                }
+            }
+            Calendar Cal_Weeks {
+                Index: w;
+                Unit: 7 * day;
+                BeginDate: P_CalendarStartDate;
+                EndDate: P_CalendarEndDate;
+                TimeslotFormat: "week %sW, %c%Y";
+            }
+            Set S_PlanningWeeks {
+                SubsetOf: Cal_Weeks;
+                Index: planw;
+                Definition: {
+                    !{w|StringToTimeSlot("%m/%d/%c%y",Cal_Days, MomentToString("%m/%d/%c%y",[day],P_CalendarStartDate,w-first(Cal_Weeks)+6))>= P_PlanningHorizonStart and StringToTimeSlot("%m/%d/%c%y",Cal_Days, MomentToString("%m/%d/%c%y",[day],P_CalendarStartDate,w-first(Cal_Weeks))) < P_PlanningHorizonEnd }
+                    
+                    !{w|StringToTimeSlot("%m/%d/%c%y",Cal_Days, MomentToString("%m/%d/%c%y",[day],P_CalendarStartDate,w-first(Cal_Weeks)+6))>= P_PlanningHorizonStart }
+                }
+            }
+            Set S_PlanningDays {
+                SubsetOf: Cal_Days;
+                Index: pdays;
+                Definition: {
+                    {day | day >= P_PlanningHorizonStart and day <= P_PlanningHorizonEnd}
+                }
+            }
+            Set s_test4 {
+                SubsetOf: Cal_Weeks;
+                Definition: {
+                    {w|StringToTimeSlot("%m/%d/%c%y",Cal_Days,MomentToString("%m/%d/%c%y",[day],P_CalendarStartDate,w-first(Cal_Weeks)))>=P_PlanningHorizonStart and StringToTimeSlot("%m/%d/%c%y",Cal_Days,MomentToString("%m/%d/%c%y",[day],P_CalendarStartDate,w-first(Cal_Weeks)))<=P_PlanningHorizonEnd }
+                }
+            }
+            Set S_Order {
+                Index: od;
+            }
+            Set S_STO {
+                SubsetOf: Integers;
+                Index: sto;
+            }
+            Set S_SKU {
+                Index: SKU;
+            }
+            Set S_SKUCategory {
+                Index: skuc;
+            }
+            Set S_ReportSKU {
+                Index: rsku;
+            }
+            Set S_Region {
+                Index: re;
+            }
+            Set S_Unit {
+                Index: un, un1;
+            }
+            Set S_OrderStatus {
+                Index: os;
+                Definition: data {'Finished', 'Pending'};
+            }
+            Set S_DC {
+                Index: DC;
+            }
+            Set S_DCDivision {
+                Index: dcd;
+            }
+            Set S_StorageGroup {
+                Index: sg;
+            }
+            Set S_TransportationGroup {
+                Index: tg;
+            }
+            Set S_Plant {
+                Index: pl;
+            }
+        }
+    }
+    Section RawTemplateDataSection {
+        DeclarationSection RawDataDeclaration {
+            Parameter P_DcLatitude {
+                IndexDomain: DC;
+            }
+            Parameter P_DcLongitude {
+                IndexDomain: DC;
+            }
+            Parameter P_PlantLatitude {
+                IndexDomain: pl;
+            }
+            Parameter P_PlantLongitude {
+                IndexDomain: pl;
+            }
+            ElementParameter P_DCDivision {
+                IndexDomain: (DC,pl);
+                Range: S_DCDivision;
+            }
+            ElementParameter P_DCofDCDivision {
+                IndexDomain: dcd;
+                Range: S_DC;
+            }
+            ElementParameter P_SKUCategoryOfSKU {
+                IndexDomain: SKU;
+                Range: S_SKUCategory;
+            }
+            StringParameter P_SKUDescription {
+                IndexDomain: SKU;
+            }
+            Parameter P_PlantHandingCapacityConsumptionRate {
+                IndexDomain: SKU;
+            }
+            ElementParameter P_SKUofReportSKU {
+                IndexDomain: rsku;
+                Range: S_SKU;
+            }
+            StringParameter P_ReportSKUDescription {
+                IndexDomain: rsku;
+            }
+        }
+        DeclarationSection RawDataNeedUnitConversion {
+            Parameter P_UnitCoversionRate {
+                IndexDomain: (SKU, un, un1);
+            }
+            Parameter P_PlantMaxDailyHandlingQuantityRaw {
+                IndexDomain: pl;
+            }
+            ElementParameter P_PlantMaxDailyHandlingQuantityRawUnit {
+                IndexDomain: pl;
+                Range: S_Unit;
+            }
+            Parameter P_MinOrderQuantityRaw {
+                IndexDomain: SKU;
+            }
+            ElementParameter P_MinOrderQuantityRawUnit {
+                IndexDomain: SKU;
+                Range: S_Unit;
+            }
+            Parameter P_PlantStoringCapacityRaw {
+                IndexDomain: (pl,sg);
+            }
+            ElementParameter P_PlantStoringCapacityRawUnit {
+                IndexDomain: (pl,sg);
+                Range: S_Unit;
+            }
+            Parameter P_DcStoringCapacityRaw {
+                IndexDomain: (DC,sg);
+            }
+            ElementParameter P_DcStoringCapacityRawUnit {
+                IndexDomain: (DC,sg);
+                Range: S_Unit;
+            }
+        }
+        DeclarationSection RawDataNeedProcess {
+            ElementParameter P_DCServingRegionSKURaw {
+                IndexDomain: (re,SKU);
+                Range: S_DC;
+            }
+            ElementParameter P_DCServingRegionSKUCategoryRaw {
+                IndexDomain: (re,SKUC);
+                Range: S_DC;
+            }
+            ElementParameter P_TMCountryRawUnit {
+                IndexDomain: (sku,mon);
+                Range: S_Unit;
+            }
+            ElementParameter P_TMRegionRawUnit {
+                IndexDomain: (re,SKU,mon);
+                Range: S_Unit;
+            }
+            Parameter P_ForecastRaw {
+                IndexDomain: (SKU,mon);
+            }
+            ElementParameter P_ForecastRawUnit {
+                IndexDomain: (SKU,mon);
+                Range: S_Unit;
+            }
+            Parameter P_ForecastRegionRaw {
+                IndexDomain: (re,SKU,mon);
+            }
+            ElementParameter P_ForecastRegionRawUnit {
+                IndexDomain: (re,SKU,mon);
+                Range: S_Unit;
+            }
+            ElementParameter P_OrderReportSKU {
+                IndexDomain: od;
+                Range: S_ReportSKU;
+            }
+            ElementParameter P_OrderSKUNew {
+                IndexDomain: od;
+                Range: S_ReportSKU;
+            }
+            Parameter P_OrderQuantityRaw {
+                IndexDomain: od;
+            }
+            ElementParameter P_OrderQuantityRawUnit {
+                IndexDomain: od;
+                Range: S_Unit;
+            }
+            ElementParameter P_StoDCDivision {
+                IndexDomain: sto;
+                Range: S_DCDivision;
+            }
+            ElementParameter P_StoReportSKU {
+                IndexDomain: sto;
+                Range: S_ReportSKU;
+            }
+            ElementParameter P_StoSKU {
+                IndexDomain: sto;
+                Range: S_SKU;
+            }
+            ElementParameter P_StoDay {
+                IndexDomain: sto;
+                Range: Cal_Days;
+            }
+            Parameter P_StoQuantityRaw {
+                IndexDomain: sto;
+            }
+            ElementParameter P_StoQuantityRawUnit {
+                IndexDomain: sto;
+                Range: S_Unit;
+            }
+            Set S_DCStock {
+                Index: dcsindex;
+            }
+            ElementParameter P_DCDivisionOfDCStock {
+                IndexDomain: dcsindex;
+                Range: S_DCDivision;
+            }
+            ElementParameter P_ReportSKUOfDCStock {
+                IndexDomain: dcsindex;
+                Range: S_ReportSKU;
+            }
+            ElementParameter P_SKUOfDCStock {
+                IndexDomain: dcsindex;
+                Range: S_SKU;
+            }
+            Parameter P_AvailableStockOfDCStock {
+                IndexDomain: dcsindex;
+            }
+            Parameter P_StockPendingCheckingOfDCStock {
+                IndexDomain: dcsindex;
+            }
+            Parameter P_StockInTransitOfDCStock {
+                IndexDomain: (dcsindex);
+            }
+            Parameter P_AvailableStock {
+                IndexDomain: (dcd,rsku);
+            }
+            Parameter P_AvailableStockNew {
+                IndexDomain: (dcd,SKU);
+            }
+            Parameter P_StockPendingChecking {
+                IndexDomain: (dcd,rsku);
+            }
+            Parameter P_StockPendingCheckingNew {
+                IndexDomain: (dcd,SKU);
+            }
+            Parameter P_StockInTransit {
+                IndexDomain: (dcd,rsku);
+            }
+            Parameter P_StockInTransitNew {
+                IndexDomain: (dcd,SKU);
+            }
+            Set S_QtySTO {
+                Index: qsto;
+            }
+            ElementParameter P_DCDivisionOfQtySTO {
+                IndexDomain: qsto;
+                Range: S_DCDivision;
+            }
+            ElementParameter P_ReportSKUOfQtySTO {
+                IndexDomain: qsto;
+                Range: S_ReportSKU;
+            }
+            ElementParameter P_SKUOfQtySTO {
+                IndexDomain: qsto;
+                Range: S_SKU;
+            }
+            Parameter P_QuantitOfQtySTO {
+                IndexDomain: qsto;
+            }
+            Set S_CMSalesOrder {
+                Index: cmso;
+            }
+            ElementParameter P_DCDivisionOfCMSO {
+                IndexDomain: cmso;
+                Range: S_DCDivision;
+            }
+            ElementParameter P_ReportSKUOfCMSO {
+                IndexDomain: cmso;
+                Range: S_ReportSKU;
+            }
+            ElementParameter P_SKUOfCMSO {
+                IndexDomain: cmso;
+                Range: S_SKU;
+            }
+            Parameter P_QuantitOfCMSO {
+                IndexDomain: cmso;
+            }
+            Set S_CMDelivery {
+                Index: cmd;
+            }
+            ElementParameter P_DCDivisionOfCMD {
+                IndexDomain: cmd;
+                Range: S_DCDivision;
+            }
+            ElementParameter P_ReportSKUOfCMD {
+                IndexDomain: cmd;
+                Range: S_ReportSKU;
+            }
+            ElementParameter P_SKUOfCMD {
+                IndexDomain: cmd;
+                Range: S_SKU;
+            }
+            Parameter P_QuantitOfCMD {
+                IndexDomain: cmd;
+            }
+            Parameter P_DesiredCoverageDaysMinRaw {
+                IndexDomain: (DC,SKU);
+            }
+            Parameter P_DesiredCoverageDaysMaxRaw {
+                IndexDomain: (DC,SKU);
+            }
+            Set S_PlantStock {
+                Index: psindex;
+            }
+            ElementParameter P_PlantOfPlantStock {
+                IndexDomain: psindex;
+                Range: S_Plant;
+            }
+            ElementParameter P_ReportSKUOfPlantStock {
+                IndexDomain: psindex;
+                Range: S_ReportSKU;
+            }
+            ElementParameter P_SKUOfPlantStock {
+                IndexDomain: psindex;
+                Range: S_SKU;
+            }
+            Parameter P_PlantAvailableStockOfPlantStock {
+                IndexDomain: psindex;
+            }
+            Parameter P_PlantInspectionStockOfPlantStock {
+                IndexDomain: psindex;
+            }
+            Parameter P_PlantAvailableStock {
+                IndexDomain: (pl,rsku);
+            }
+            Parameter P_PlantAvailableStockNew {
+                IndexDomain: (pl,SKU);
+            }
+            Parameter P_PlantInspectionStock {
+                IndexDomain: (pl,rsku);
+            }
+            Parameter P_PlantInspectionStockNew {
+                IndexDomain: (pl,SKU);
+            }
+            Parameter P_TGTMFlag {
+                IndexDomain: (tg,tm);
+            }
+        }
+        Procedure ReadExcelData {
+            Body: {
+                !!! Read customer data
+                !FileSelect(
+                !	filename  :  P_FileName,
+                !	directory :  ,
+                !	extension :  ".xlsm",
+                !	title     :  );
+                
+                !P_FileName := "STO_Input_Template_sanofi-data-v3.xlsx";
+                !P_FileName := "STO_Input_Template_sanofi-data-v3.1.xlsx";
+                !P_FileName := "STO_Input_Template_sanofi-data-v3.2.xlsx";
+                !P_FileName := "STO_Input_Template_sanofi-data-v3.3.xlsx";
+                !P_FileName := "STO_Input_Template_sanofi-data-v4.xlsx";
+                
+                P_FileName := "InputData\\STO_Input_Template.xlsm";
+                
+                empty S_Region, S_DC, P_DcLatitude, P_DcLongitude, S_Unit;
+                empty S_Plant, P_PlantLatitude, P_PlantLongitude, P_PlantMaxDailyHandlingQuantityRaw, P_PlantMaxDailyHandlingQuantityRawUnit;
+                empty S_DCDivision, P_DCDivision, P_DCofDCDivision;
+                empty S_SKUCategory, S_SKU, P_SKUCategoryOfSKU, P_SKUProducingPlant, P_SKUDescription;
+                empty P_MinOrderQuantityRaw, P_MinOrderQuantityRawUnit, P_PlantHandingCapacityConsumptionRate;
+                !empty S_ReportSKU, P_SKUofReportSKU, P_ReportSKUDescription;
+                empty P_UnitCoversionRate;
+                empty P_DCServingRegionSKURaw, P_DCServingRegionSKUCategoryRaw;
+                
+                !empty P_TMCountryRaw, P_TMCountryRawUnit, P_TMRegionRaw, P_TMRegionRawUnit, P_ForecastRaw, P_ForecastRawUnit;
+                empty P_TMCountry, P_TMCountryRawUnit, P_TMRegion, P_TMRegionRawUnit, P_ForecastRaw, P_ForecastRawUnit, P_ForecastRegionRaw, P_ForecastRegionRawUnit;
+                empty S_Order, P_OrderRegion;
+                !empty P_OrderReportSKU,
+                empty P_OrderSku, P_OrderDay, P_OrderQuantityRaw, P_OrderQuantityRawUnit;
+                empty S_STO, P_StoDCDivision;
+                !empty P_StoReportSKU
+                empty P_StoSKU, P_StoDay, P_StoQuantityRaw, P_StoQuantityRawUnit;
+                
+                empty S_StorageGroup, P_SKUStorageGroup, P_IsDCServingSKU, P_DcSKUPriority1;
+                empty P_DcStoringCapacityRaw, P_DcStoringCapacityRawUnit;
+                empty S_DCStock, P_DCDivisionOfDCStock;
+                !empty P_ReportSKUOfDCStock;
+                empty P_SKUOfDCStock, P_AvailableStockOfDCStock, P_StockPendingCheckingOfDCStock, P_StockInTransitOfDCStock;
+                
+                empty S_QtySTO, P_DCDivisionOfQtySTO;
+                !empty P_ReportSKUOfQtySTO;
+                empty P_SKUOfQtySTO, P_QuantitOfQtySTO;
+                empty S_CMSalesOrder, P_DCDivisionOfCMSO;
+                !empty P_ReportSKUOfCMSO;
+                empty P_SKUOfCMSO, P_QuantitOfCMSO;
+                empty S_CMDelivery, P_DCDivisionOfCMD;
+                !empty P_ReportSKUOfCMD;
+                empty P_SKUOfCMD, P_QuantitOfCMD;
+                
+                empty P_DesiredCoverageDaysMinRaw, P_DesiredCoverageDaysMaxRaw;
+                empty P_PlantStoringCapacityRaw, P_PlantStoringCapacityRawUnit, P_PreferedStockLevel;
+                empty S_PlantStock, P_PlantOfPlantStock;
+                !empty P_ReportSKUOfPlantStock;
+                empty P_SKUOfPlantStock, P_PlantAvailableStockOfPlantStock, P_PlantInspectionStockOfPlantStock;
+                
+                empty S_TransportationGroup, P_SKUTransportationGroup, P_DCTgPriority;
+                empty S_TransportationMode, P_TGTMFlag;
+                empty S_TruckTypeModel, S_TruckTypeRaw, P_RawTruckType, P_TransportationMode, P_TruckCapacity, P_TruckCapacityUnit, P_RawTruckTranpostationCost;
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"Region");
+                numRows := 1000;
+                dataRangeStr := formatString("A2:A%i",numRows);
+                SpreadSheet::RetrieveSet(Workbook:P_FileName, Set:S_Region, Range:dataRangeStr, Mode:'replace');
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"DC");
+                numRows := 1000;
+                dataRangeStr := formatString("A2:A%i",numRows);
+                SpreadSheet::RetrieveSet(Workbook:P_FileName, Set:S_DC, Range:dataRangeStr, Mode:'replace');
+                
+                rowRangeStr := formatString("A2:A%i",numRows);
+                dataRangeStr := formatString("B2:B%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_DcLatitude, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("C2:C%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_DcLongitude, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"Unit");
+                numRows := 1000;
+                dataRangeStr := formatString("A2:A%i",numRows);
+                SpreadSheet::RetrieveSet(Workbook:P_FileName, Set:S_Unit, Range:dataRangeStr, Mode:'replace');
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"Plant");
+                numRows := 1000;
+                dataRangeStr := formatString("A2:A%i",numRows);
+                SpreadSheet::RetrieveSet(Workbook:P_FileName, Set:S_Plant, Range:dataRangeStr, Mode:'replace');
+                
+                rowRangeStr := formatString("A2:A%i",numRows);
+                dataRangeStr := formatString("B2:B%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_PlantLatitude, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("C2:C%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_PlantLongitude, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("D2:D%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_PlantMaxDailyHandlingQuantityRaw, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("E2:E%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_PlantMaxDailyHandlingQuantityRawUnit, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"DC Division");
+                numRows := 1000;
+                dataRangeStr := formatString("C2:C%i",numRows);
+                SpreadSheet::RetrieveSet(Workbook:P_FileName, Set:S_DCDivision, Range:dataRangeStr, Mode:'replace');
+                
+                rowRangeStr := formatString("A2:B%i",numRows);
+                dataRangeStr := formatString("C2:C%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_DCDivision, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                rowRangeStr := formatString("C2:C%i",numRows);
+                dataRangeStr := formatString("A2:A%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_DCofDCDivision, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"SKU Category");
+                numRows := 1000;
+                dataRangeStr := formatString("A2:A%i",numRows);
+                SpreadSheet::RetrieveSet(Workbook:P_FileName, Set:S_SKUCategory, Range:dataRangeStr, Mode:'replace');
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"SKU");
+                numRows := 1000;
+                dataRangeStr := formatString("A2:A%i",numRows);
+                SpreadSheet::RetrieveSet(Workbook:P_FileName, Set:S_SKU, Range:dataRangeStr, Mode:'replace');
+                
+                rowRangeStr := formatString("A2:A%i",numRows);
+                dataRangeStr := formatString("B2:B%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_SKUCategoryOfSKU, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("C2:C%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_SKUProducingPlant, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("D2:D%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_SKUDescription, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("F2:F%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_MinOrderQuantityRaw, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                P_MinOrderQuantityRawUnit(SKU) := 'PCS';
+                
+                dataRangeStr := formatString("G2:G%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_PlantHandingCapacityConsumptionRate, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                !SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"ReportSKU");
+                !numRows := 1000;
+                !dataRangeStr := formatString("A2:A%i",numRows);
+                !SpreadSheet::RetrieveSet(Workbook:P_FileName, Set:S_ReportSKU, Range:dataRangeStr, Mode:'replace');
+                !
+                !rowRangeStr := formatString("A2:A%i",numRows);
+                !dataRangeStr := formatString("B2:B%i", numRows);
+                !SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_SKUofReportSKU, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                !
+                !dataRangeStr := formatString("D2:D%i", numRows);
+                !SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_ReportSKUDescription, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"Unit Conversion");
+                numRows := 1000;
+                rowRangeStr := formatString("A2:C%i",numRows);
+                dataRangeStr := formatString("D2:D%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_UnitCoversionRate, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"DC Region Coverage - Category");
+                numRows := 1000;
+                rowRangeStr := formatString("B2:C%i",numRows);
+                dataRangeStr := formatString("A2:A%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_DCServingRegionSKUCategoryRaw, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"DC Region Coverage - SKU");
+                numRows := 50000;
+                rowRangeStr := formatString("B2:C%i",numRows);
+                dataRangeStr := formatString("A2:A%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_DCServingRegionSKURaw, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"TM Country");
+                numRows := 10000;
+                rowRangeStr := formatString("A2:B%i",numRows);
+                dataRangeStr := formatString("C2:C%i", numRows);
+                !SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_TMCountryRaw, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_TMCountry, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("D2:D%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_TMCountryRawUnit, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"TM Region");
+                numRows := 50000;
+                rowRangeStr := formatString("A2:C%i",numRows);
+                dataRangeStr := formatString("D2:D%i", numRows);
+                !SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_TMRegionRaw, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_TMRegion, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("E2:E%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_TMRegionRawUnit, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"Forecasted Demand");
+                numRows := 1000;
+                rowRangeStr := formatString("A2:A%i",numRows);
+                columnRangeStr := formatString("E1:BI1");
+                dataRangeStr := formatString("E2:BI%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_ForecastRaw, DataRange:dataRangeStr, RowsRange:rowRangeStr, ColumnsRange:columnRangeStr);
+                
+                P_ForecastRawUnit(SKU, mon) := 'PCS';
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"Forecasted Demand Region");
+                numRows := 50000;
+                rowRangeStr := formatString("A2:B%i",numRows);
+                columnRangeStr := formatString("E1:AU1");
+                dataRangeStr := formatString("E2:AU%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_ForecastRegionRaw, DataRange:dataRangeStr, RowsRange:rowRangeStr, ColumnsRange:columnRangeStr);
+                
+                P_ForecastRegionRawUnit(re, SKU, mon) := 'PCS';
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"History Order");
+                numRows := 200000;
+                dataRangeStr := formatString("A2:A%i", numRows);
+                SpreadSheet::RetrieveSet(Workbook:P_FileName, Set:S_Order, Range:dataRangeStr, Mode:'replace');
+                
+                rowRangeStr := formatString("A2:A%i",numRows);
+                dataRangeStr := formatString("B2:B%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_OrderRegion, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("C2:C%i", numRows);
+                !SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_OrderReportSKU, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_OrderSku, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("D2:D%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_OrderDay, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("E2:E%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_OrderQuantityRaw, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("F2:F%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_OrderQuantityRawUnit, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"History STO");
+                numRows := 200000;
+                dataRangeStr := formatString("A2:A%i", numRows);
+                SpreadSheet::RetrieveSet(Workbook:P_FileName, Set:S_STO, Range:dataRangeStr, Mode:'replace');
+                
+                rowRangeStr := formatString("A2:A%i",numRows);
+                dataRangeStr := formatString("L2:L%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_StoDCDivision, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                rowRangeStr := formatString("A2:A%i",numRows);
+                dataRangeStr := formatString("F2:F%i", numRows);
+                !SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_StoReportSKU, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_StoSKU, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                rowRangeStr := formatString("A2:A%i",numRows);
+                dataRangeStr := formatString("O2:O%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_StoDay, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                rowRangeStr := formatString("A2:A%i",numRows);
+                dataRangeStr := formatString("I2:I%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_StoQuantityRaw, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                P_StoQuantityRawUnit(sto) := 'PCS';
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"Storage Group");
+                numRows := 100;
+                dataRangeStr := formatString("A2:A%i", numRows);
+                SpreadSheet::RetrieveSet(Workbook:P_FileName, Set:S_StorageGroup, Range:dataRangeStr, Mode:'replace');
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"SKU Storage Group");
+                numRows := 1000;
+                rowRangeStr := formatString("B2:B%i",numRows);
+                dataRangeStr := formatString("A2:A%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_SKUStorageGroup, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"DC Serving SKU");
+                numRows := 1000;
+                rowRangeStr := formatString("A2:B%i",numRows);
+                dataRangeStr := formatString("C2:C%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_IsDCServingSKU, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("D2:D%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_DcSKUPriority1, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"DC Capacity");
+                numRows := 1000;
+                rowRangeStr := formatString("A2:B%i",numRows);
+                dataRangeStr := formatString("C2:C%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_DcStoringCapacityRaw, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("D2:D%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_DcStoringCapacityRawUnit, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"DC Stock");
+                numRows := 1000;
+                
+                !rowRangeStr := formatString("A2:B%i",numRows);
+                !dataRangeStr := formatString("E2:E%i", numRows);
+                !SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_AvailableStock, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                !
+                !dataRangeStr := formatString("F2:F%i", numRows);
+                !SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_StockPendingChecking, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                !
+                !dataRangeStr := formatString("H2:H%i", numRows);
+                !SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_StockInTransit, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("A2:A%i", numRows);
+                SpreadSheet::RetrieveSet(Workbook:P_FileName, Set:S_DCStock, Range:dataRangeStr, Mode:'replace');
+                
+                rowRangeStr := formatString("A2:A%i",numRows);
+                dataRangeStr := formatString("B2:B%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_DCDivisionOfDCStock, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("C2:C%i", numRows);
+                !SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_ReportSKUOfDCStock, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_SKUOfDCStock, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("F2:F%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_AvailableStockOfDCStock, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("G2:G%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_StockPendingCheckingOfDCStock, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("I2:I%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_StockInTransitOfDCStock, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"Quantity STO");
+                numRows := 1000;
+                dataRangeStr := formatString("B2:B%i", numRows);
+                SpreadSheet::RetrieveSet(Workbook:P_FileName, Set:S_QtySTO, Range:dataRangeStr, Mode:'replace');
+                
+                rowRangeStr := formatString("B2:B%i",numRows);
+                dataRangeStr := formatString("C2:C%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_DCDivisionOfQtySTO, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("F2:F%i", numRows);
+                !SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_ReportSKUOfQtySTO, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_SKUOfQtySTO, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("J2:J%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_QuantitOfQtySTO, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"Current Month Sales Order");
+                numRows := 100000;
+                dataRangeStr := formatString("A2:A%i", numRows);
+                SpreadSheet::RetrieveSet(Workbook:P_FileName, Set:S_CMSalesOrder, Range:dataRangeStr, Mode:'replace');
+                
+                rowRangeStr := formatString("A2:A%i",numRows);
+                dataRangeStr := formatString("F2:F%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_DCDivisionOfCMSO, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("C2:C%i", numRows);
+                !SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_ReportSKUOfCMSO, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_SKUOfCMSO, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("E2:E%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_QuantitOfCMSO, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"Current Month Delivery Note");
+                numRows := 100000;
+                dataRangeStr := formatString("A2:A%i", numRows);
+                SpreadSheet::RetrieveSet(Workbook:P_FileName, Set:S_CMDelivery, Range:dataRangeStr, Mode:'replace');
+                
+                rowRangeStr := formatString("A2:A%i",numRows);
+                dataRangeStr := formatString("N2:N%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_DCDivisionOfCMD, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("F2:F%i", numRows);
+                !SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_ReportSKUOfCMD, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_SKUOfCMD, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("H2:H%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_QuantitOfCMD, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"DC Desired Covering");
+                numRows := 10000;
+                rowRangeStr := formatString("A2:B%i",numRows);
+                dataRangeStr := formatString("C2:C%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_DesiredCoverageDaysMinRaw, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("D2:D%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_DesiredCoverageDaysMaxRaw, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"Plant Storing Capacity");
+                numRows := 100;
+                rowRangeStr := formatString("A2:B%i",numRows);
+                dataRangeStr := formatString("C2:C%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_PlantStoringCapacityRaw, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("D2:D%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_PlantStoringCapacityRawUnit, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("E2:E%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_PreferedStockLevel, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"Plant Stock");
+                numRows := 1000;
+                
+                !rowRangeStr := formatString("A2:B%i",numRows);
+                !dataRangeStr := formatString("E2:E%i", numRows);
+                !SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_PlantAvailableStock, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                !
+                !dataRangeStr := formatString("F2:F%i", numRows);
+                !SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_PlantInspectionStock, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("A2:A%i", numRows);
+                SpreadSheet::RetrieveSet(Workbook:P_FileName, Set:S_PlantStock, Range:dataRangeStr, Mode:'replace');
+                
+                rowRangeStr := formatString("A2:A%i",numRows);
+                dataRangeStr := formatString("B2:B%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_PlantOfPlantStock, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("C2:C%i", numRows);
+                !SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_ReportSKUOfPlantStock, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_SKUOfPlantStock, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("F2:F%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_PlantAvailableStockOfPlantStock, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("G2:G%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_PlantInspectionStockOfPlantStock, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"Transportation Group");
+                numRows := 100;
+                dataRangeStr := formatString("A2:A%i", numRows);
+                SpreadSheet::RetrieveSet(Workbook:P_FileName, Set:S_TransportationGroup, Range:dataRangeStr, Mode:'replace');
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"SKU Transportation Group");
+                numRows := 1000;
+                rowRangeStr := formatString("B2:B%i",numRows);
+                dataRangeStr := formatString("A2:A%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_SKUTransportationGroup, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                P_DCTgPriority(DC, tg) := 1;
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"DC TransportationGroup Priority");
+                numRows := 1000;
+                rowRangeStr := formatString("A2:B%i",numRows);
+                dataRangeStr := formatString("C2:C%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_DCTgPriority, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"Transportation Mode");
+                numRows := 100;
+                dataRangeStr := formatString("A2:A%i", numRows);
+                SpreadSheet::RetrieveSet(Workbook:P_FileName, Set:S_TransportationMode, Range:dataRangeStr, Mode:'replace');
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"Transport Group Mode Mapping");
+                numRows := 1000;
+                rowRangeStr := formatString("A2:B%i",numRows);
+                dataRangeStr := formatString("C2:C%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_TGTMFlag, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"Truck Type");
+                numRows := 100;
+                dataRangeStr := formatString("A2:A%i", numRows);
+                SpreadSheet::RetrieveSet(Workbook:P_FileName, Set:S_TruckTypeModel, Range:dataRangeStr, Mode:'replace');
+                
+                dataRangeStr := formatString("B2:B%i", numRows);
+                SpreadSheet::RetrieveSet(Workbook:P_FileName, Set:S_TruckTypeRaw, Range:dataRangeStr, Mode:'replace');
+                
+                rowRangeStr := formatString("A2:A%i",numRows);
+                dataRangeStr := formatString("B2:B%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_RawTruckType, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("C2:C%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_TransportationMode, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("D2:D%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_TruckCapacity, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                dataRangeStr := formatString("E2:E%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_TruckCapacityUnit, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                SpreadSheet::SetActiveSheet(Workbook:P_FileName, Name:"Truck Cost");
+                numRows := 1000;
+                rowRangeStr := formatString("A2:C%i",numRows);
+                dataRangeStr := formatString("D2:D%i", numRows);
+                SpreadSheet::RetrieveTable(Workbook:P_FileName, Parameter:P_RawTruckTranpostationCost, DataRange:dataRangeStr, RowsRange:rowRangeStr);
+                
+                Spreadsheet::CloseWorkbook(P_FileName, 0);
+            }
+            StringParameter P_FileName;
+            Parameter numRows;
+            StringParameter dataRangeStr;
+            StringParameter rowRangeStr;
+            StringParameter columnRangeStr;
+        }
+        Procedure ProcessRawData {
+            Body: {
+                !empty P_OrderSku;
+                empty P_DCServingRegionSKU, P_OrderQuantity;
+                !empty P_TMCountry, P_TMRegion
+                empty P_Forecast, P_ForecastRegion;
+                
+                !empty P_AvailableStock, P_StockPendingChecking, P_StockInTransit;
+                empty P_AvailableStockNew, P_StockPendingCheckingNew, P_StockInTransitNew;
+                
+                !empty P_PlantAvailableStock, P_PlantInspectionStock;
+                empty P_PlantAvailableStockNew, P_PlantInspectionStockNew;
+                
+                empty P_SKUPlantCurrentStock, P_PlantStoringCapacity, P_DcStoringCapacity;
+                empty P_MinOrderQuantity, P_PlantMaxDailyHandlingQuantity;
+                empty P_DesiredCoverageDaysMin, P_DesiredCoverageDaysMax;
+                !empty P_StockInSTO;
+                empty P_StockInSTONew;
+                !empty P_CurrentMonthTobeDeliveredQuantity;
+                empty P_CurrentMonthTobeDeliveredQuantityNew;
+                empty P_DcCurrentStock;
+                empty S_TMforTG, P_BigTransportationCost, P_TruckTransporationCost;
+                
+                
+                !for (od) do
+                !	P_OrderSku(od) := P_SKUofReportSKU (P_OrderReportSKU(od));
+                !endfor;
+                
+                for(re, SKU) do
+                	P_DCServingRegionSKU(re, SKU) := P_DCServingRegionSKUCategoryRaw(re, P_SKUCategoryOfSKU(SKU));
+                	if (P_DCServingRegionSKURaw(re, SKU) in S_DC) then
+                		P_DCServingRegionSKU(re, SKU) := P_DCServingRegionSKURaw(re, SKU);
+                	endif;	
+                endfor;
+                
+                P_OrderQuantity(od) := P_OrderQuantityRaw(od);
+                
+                !for (rsku, mon) do
+                !	P_TMCountry(P_SKUofReportSKU(rsku), mon) := P_TMCountry(P_SKUofReportSKU(rsku), mon) + P_TMCountryRaw(rsku, mon);
+                !endfor;
+                !
+                !for (re, rsku, mon) do
+                !	P_TMRegion(re, P_SKUofReportSKU(rsku), mon) := P_TMRegion(re, P_SKUofReportSKU(rsku), mon) + P_TMRegionRaw(re, rsku, mon);
+                !endfor;
+                
+                P_Forecast(SKU, mon) := P_ForecastRaw(SKU, mon);
+                P_ForecastRegion(re, SKU, mon) := P_ForecastRegionRaw(re, SKU, mon);
+                
+                for(dcsindex) do
+                	P_AvailableStockNew(P_DCDivisionOfDCStock(dcsindex), P_SKUOfDCStock(dcsindex)) :=
+                	P_AvailableStockNew(P_DCDivisionOfDCStock(dcsindex), P_SKUOfDCStock(dcsindex)) + P_AvailableStockOfDCStock(dcsindex);
+                
+                	P_StockPendingCheckingNew(P_DCDivisionOfDCStock(dcsindex), P_SKUOfDCStock(dcsindex)) :=
+                	P_StockPendingCheckingNew(P_DCDivisionOfDCStock(dcsindex), P_SKUOfDCStock(dcsindex)) + P_StockPendingCheckingOfDCStock(dcsindex);
+                
+                	P_StockInTransitNew(P_DCDivisionOfDCStock(dcsindex), P_SKUOfDCStock(dcsindex)) :=
+                	P_StockInTransitNew(P_DCDivisionOfDCStock(dcsindex), P_SKUOfDCStock(dcsindex)) + P_StockInTransitOfDCStock(dcsindex);
+                endfor;
+                
+                for(psindex) do
+                	P_PlantAvailableStockNew(P_PlantOfPlantStock(psindex), P_SKUOfPlantStock(psindex)) := 
+                	P_PlantAvailableStockNew(P_PlantOfPlantStock(psindex), P_SKUOfPlantStock(psindex)) + P_PlantAvailableStockOfPlantStock(psindex);
+                
+                	P_PlantInspectionStockNew(P_PlantOfPlantStock(psindex), P_SKUOfPlantStock(psindex)) := 
+                	P_PlantInspectionStockNew(P_PlantOfPlantStock(psindex), P_SKUOfPlantStock(psindex)) + P_PlantInspectionStockOfPlantStock(psindex);
+                endfor;
+                
+                for (SKU, pl | P_SKUProducingPlant(SKU) = pl) do
+                	P_SKUPlantCurrentStock(SKU) := P_SKUPlantCurrentStock(SKU) + P_PlantAvailableStockNew(pl, SKU) + P_PlantInspectionStockNew(pl, SKU);
+                endfor;
+                
+                P_PlantStoringCapacity(pl, sg) := P_PlantStoringCapacityRaw(pl, sg);
+                P_DcStoringCapacity(DC, sg) := P_DcStoringCapacityRaw(DC, sg);
+                P_MinOrderQuantity(SKU) := P_MinOrderQuantityRaw(SKU);
+                P_PlantMaxDailyHandlingQuantity(pl) := P_PlantMaxDailyHandlingQuantityRaw(pl);
+                
+                !for(DC) do
+                	P_DesiredCoverageDaysMin(DC, SKU) := P_DesiredCoverageDaysMinRaw(DC, SKU);
+                	P_DesiredCoverageDaysMax(DC, SKU) := P_DesiredCoverageDaysMaxRaw(DC, SKU);
+                !endfor;
+                
+                for(dcd, SKU, qsto) do
+                	if(P_DCDivisionOfQtySTO(qsto) = dcd and P_SKUOfQtySTO(qsto) = SKU) then
+                		P_StockInSTONew(dcd, SKU) := P_StockInSTONew(dcd, SKU) + P_QuantitOfQtySTO(qsto);
+                	endif;	
+                endfor;
+                
+                for(dcd, SKU) do
+                	for (cmso) do
+                		if(P_DCDivisionOfCMSO(cmso) = dcd and P_SKUOfCMSO(cmso) = SKU) then
+                			P_CurrentMonthTobeDeliveredQuantityNew(dcd, SKU) := 
+                			P_CurrentMonthTobeDeliveredQuantityNew(dcd, SKU) + P_QuantitOfCMSO(cmso);
+                		endif;	
+                	endfor;
+                	for (cmd) do
+                		if(P_DCDivisionOfCMD(cmd) = dcd and P_SKUOfCMD(cmd) = SKU) then
+                			P_CurrentMonthTobeDeliveredQuantityNew(dcd, SKU) :=
+                			P_CurrentMonthTobeDeliveredQuantityNew(dcd, SKU) - P_QuantitOfCMD(cmd);
+                		endif;	
+                	endfor;
+                endfor;
+                
+                P_DcCurrentStock(DC, SKU) := 0;
+                for (dcd, SKU) do
+                	P_DcCurrentStock(P_DCofDCDivision(dcd), SKU) := P_DcCurrentStock(P_DCofDCDivision(dcd), SKU)
+                							+ P_AvailableStockNew(dcd, SKU)
+                							+ P_StockInTransitNew(dcd, SKU)
+                							+ P_StockPendingCheckingNew(dcd, SKU)
+                							+ P_StockInSTONew(dcd, SKU)
+                							- P_CurrentMonthTobeDeliveredQuantityNew(dcd, SKU);
+                endfor;
+                
+                for (DC, SKU) do
+                	if (P_DcCurrentStock(DC, SKU) < 0) then
+                		P_DcCurrentStock(DC, SKU) := 0;
+                	endif;
+                endfor;
+                
+                for(tg, tm) do
+                	if (P_TGTMFlag(tg,tm) = 1) then
+                		S_TMforTG(tg) := S_TMforTG(tg) + tm;
+                	endif;
+                endfor;
+                
+                P_BigTransportationCost := 10000000;
+                for (pl, DC, tkt) do
+                	P_TruckTransporationCost(pl, DC, tkt) := P_RawTruckTranpostationCost(P_RawTruckType(tkt), pl, DC);
+                
+                	if (P_TruckTransporationCost(pl, DC, tkt) = 0) then
+                		P_TruckTransporationCost(pl, DC, tkt) := P_BigTransportationCost;
+                	endif;
+                endfor;
+            }
+        }
+        DeclarationSection ProcessedData {
+            ElementParameter P_DCServingRegionSKU {
+                IndexDomain: (re,SKU);
+                Range: S_DC;
+            }
+            Parameter P_StockInSTO {
+                IndexDomain: (dcd,rsku);
+            }
+            Parameter P_StockInSTONew {
+                IndexDomain: (dcd,SKU);
+            }
+            Parameter P_CurrentMonthTobeDeliveredQuantity {
+                IndexDomain: (dcd,rsku);
+            }
+            Parameter P_CurrentMonthTobeDeliveredQuantityNew {
+                IndexDomain: (dcd,SKU);
+            }
+        }
+    }
+    Section CommonSection {
+        DeclarationSection CommonParameterDeclaration {
+            StringParameter P_CalendarStartDate {
+                Definition: {
+                    "2013-12-30"
+                    !"12/26/2011"
+                }
+            }
+            StringParameter P_CalendarEndDate {
+                Definition: {
+                    "2023-12-31"
+                    !"12/31/2027"
+                }
+            }
+            Quantity SI_Time_Duration {
+                BaseUnit: day;
+                Conversions: {
+                    month->day : #-># * 30.41666667,
+                    year ->day : #-># * 365,
+                    week ->day : #-># * 7
+                }
+            }
+            ElementParameter P_DayToMonth {
+                IndexDomain: day;
+                Range: Cal_Months;
+                Definition: {
+                    first( mon | TimeslotCharacteristic(mon,'month') =
+                               TimeslotCharacteristic(day,'month')
+                               and
+                               TimeslotCharacteristic(mon,'year') =
+                               TimeslotCharacteristic(day,'year') )
+                }
+            }
+            ElementParameter P_DayToWeek {
+                IndexDomain: day;
+                Range: Cal_Weeks;
+                Comment: {
+                    "first( w | TimeslotCharacteristic(w,\'week\') =
+                               TimeslotCharacteristic(day,\'week\')
+                               and
+                               TimeslotCharacteristic(w,\'year\') =
+                               TimeslotCharacteristic(day,\'year\') )"
+                }
+            }
+            ElementParameter P_WeekToMonth {
+                IndexDomain: w;
+                Range: Cal_Months;
+                Definition: {
+                    first( mon | TimeslotCharacteristic(w,'month') =
+                               TimeslotCharacteristic(mon,'month')
+                               and
+                               TimeslotCharacteristic(w,'year') =
+                               TimeslotCharacteristic(mon,'year') )
+                }
+            }
+            ElementParameter P_PlanningHorizonStart {
+                Range: Cal_Days;
+            }
+            ElementParameter P_PlanningHorizonEnd {
+                Range: Cal_Days;
+            }
+            ElementParameter P_PlanningHorizonStartWeek {
+                Range: Cal_Weeks;
+            }
+            ElementParameter P_PlanningHorizonEndWeek {
+                Range: Cal_Weeks;
+            }
+            Parameter P_IsDCServingSKU {
+                IndexDomain: (DC,SKU);
+            }
+            ElementParameter P_SKUProducingPlant {
+                IndexDomain: SKU;
+                Range: S_Plant;
+            }
+            ElementParameter P_SKUStorageGroup {
+                IndexDomain: SKU;
+                Range: S_StorageGroup;
+            }
+            Parameter P_SKUPlantCurrentStock {
+                IndexDomain: SKU;
+            }
+            ElementParameter P_SKUTransportationGroup {
+                IndexDomain: SKU;
+                Range: S_TransportationGroup;
+            }
+            Parameter P_IsAccountClosingDate {
+                IndexDomain: pdays;
+                Range: binary;
+                InitialData: 0;
+            }
+            Parameter P_IsAccountClosingDateBackup {
+                IndexDomain: day | day >= P_PlanningHorizonStart and day <= P_PlanningHorizonEnd;
+                Range: binary;
+                InitialData: 0;
+            }
+            ElementParameter P_DefaultUnit {
+                Range: S_Unit;
+            }
+            Parameter P_IsSKUExcluded {
+                IndexDomain: SKU;
+            }
+        }
+        Procedure GetTime {
+            Body: {
+                empty P_CurrentTime, P_CurrentDate, p_num, p_dayMonday, P_DayToWeek;
+                
+                P_CurrentTime := CurrentToString("%m/%d/%c%y");
+                P_CurrentDate := CurrentToTimeSlot(Cal_Days);
+                
+                
+                for(day) do
+                  p_num := 0;
+                  while(p_num <= 6) do
+                     if(TimeslotCharacteristic(day - p_num,'weekday') = 1) then
+                        p_dayMonday(day) := day - p_num;
+                
+                        break;
+                     endif;
+                     p_num := p_num + 1;
+                  endwhile;
+                
+                endfor;
+                
+                
+                for(day, w) do
+                    if( TimeslotCharacteristic(w,'year') = TimeslotCharacteristic(p_dayMonday(day),'year')
+                        and TimeslotCharacteristic(w,'week') = TimeslotCharacteristic(p_dayMonday(day),'week')) then
+                     P_DayToWeek(day) := w;
+                     endif;
+                endfor;
+                
+                !InitializePlanningWeeks;
+            }
+        }
+        DeclarationSection TimeDeclaration {
+            Parameter P_NUM;
+            StringParameter P_CurrentTime;
+            ElementParameter P_dayMonday {
+                IndexDomain: day;
+                Range: Cal_Days;
+            }
+            ElementParameter P_CurrentDate {
+                Range: Cal_Days;
+            }
+        }
+    }
+    Section PullSection {
+        Procedure CalculatePull {
+            Body: {
+                empty P_MOMResult, P_YOYResult;
+                
+                P_ISMOM := 1;
+                PullLogicRatioCalculation;
+                PullBothCalculation;
+                
+                P_ISMOM := 0;
+                PullLogicRatioCalculation;
+                PullBothCalculation;
+            }
+        }
+        Procedure CalculatePull_Backup {
+            Body: {
+                empty P_RegionMOMResult, P_RegionYOYResult, P_MOMResult, P_YOYResult;
+                
+                P_ISMOM := 1;
+                PullLogicRatioCalculation;
+                for(DC, day, SKU | day >= P_PlanningHorizonStart and day <= P_PlanningHorizonEnd + P_AdditionalDaysToForcast) do
+                    if(sum(re, P_TMRegion(re, SKU, P_DayToMonth(day))) > 0) then
+                    	for(re | P_DCServingRegionSKU(re, SKU) = DC) do
+                        	P_RegionMOMResult(re, day, SKU) := P_TMRegion(re, SKU, P_DayToMonth(day)) * P_RegionMOMResultRatio(re, day, SKU);
+                
+                        	P_MOMResult(DC, day, SKU) := P_MOMResult(DC, day, SKU) + P_RegionMOMResult(re, day, SKU);
+                        endfor;
+                    elseif(P_TMCountry(SKU, P_DayToMonth(day)) > 0) then
+                        P_MOMResult(DC,day,SKU) := P_TMCountry(SKU, P_DayToMonth(day)) * P_MOMResultRatio(DC, day, SKU);
+                    else
+                        P_MOMResult(DC,day,SKU) := P_Forecast(SKU, P_DayToMonth(day)) * P_MOMResultRatio(DC, day, SKU);
+                    endif;
+                endfor;
+                
+                P_ISMOM:=0;
+                PullLogicRatioCalculation;
+                for(DC, day, SKU | day >= P_PlanningHorizonStart and day <= P_PlanningHorizonEnd + P_AdditionalDaysToForcast) do
+                    if(sum(re, P_TMRegion(re, SKU, P_DayToMonth(day))) > 0) then
+                    	for(re | P_DCServingRegionSKU(re, SKU) = dc) do
+                        	P_RegionYOYResult(re, day, SKU) := P_TMRegion(re, SKU, P_DayToMonth(day)) * P_RegionYOYResultRatio(re, day, SKU);
+                
+                        	P_YOYResult(DC, day, SKU) := P_YOYResult(DC, day, SKU) + P_RegionYOYResult(re, day, SKU);
+                        endfor;
+                    elseif(P_TMCountry(SKU, P_DayToMonth(day)) > 0) then
+                        P_YOYResult(DC, day, SKU) := P_TMCountry(SKU, P_DayToMonth(day)) * P_YOYResultRatio(DC, day, SKU);
+                    else
+                        P_YOYResult(DC, day, SKU) := P_Forecast(SKU, P_DayToMonth(day)) * P_YOYResultRatio(DC, day, SKU);
+                    endif;
+                endfor;
+            }
+        }
+        Procedure PullLogicRatioCalculation {
+            Body: {
+                empty S_PullPlanningHorizonMonths;
+                
+                empty P_TotalOrderQuantity, P_DCDaySKUOrderQuantityTemp;
+                empty P_DCDaySKUOrderQuantity;
+                
+                empty P_TotalOrderQuantityRegion, P_RegionDaySKUOrderQuantityTemp;
+                empty P_RegionDaySKUOrderQuantity;
+                
+                empty P_MOMResultRatio, P_YOYResultRatio;
+                empty P_RegionMOMResultRatio, P_RegionYOYResultRatio;
+                
+                !get planning horizon months
+                for(day | day >= P_PlanningHorizonStart and day <= P_PlanningHorizonEnd + P_AdditionalDaysToForcast) do
+                   S_PullPlanningHorizonMonths := S_PullPlanningHorizonMonths + TimeslotCharacteristic(day, 'month');
+                endfor;
+                
+                !month-on-month
+                !if order month is within range and dc is serving the sku
+                if(P_ISMOM) then
+                	!for(or|P_DayToMonth(P_OrderDay(od))>=P_EarliestMonthToConsider and P_IsDCServingSKU(  P_RegionServingDC(P_OrderRegion(od)),P_OrderSku(od))) do
+                	! As 1 region could be served by more than 1 DC
+                	for(od | P_DayToMonth(P_OrderDay(od)) >= P_EarliestMonthToConsider 
+                		 and P_IsDCServingSKU(P_DCServingRegionSKU(P_OrderRegion(od), P_OrderSku(od)), P_OrderSku(od))) do
+                	   P_TotalOrderQuantity(P_OrderSku(od)) := P_TotalOrderQuantity(P_OrderSku(od)) + P_OrderQuantity(od);
+                
+                	   P_DCDaySKUOrderQuantityTemp(P_DCServingRegionSKU(P_OrderRegion(od), P_OrderSku(od)), P_OrderDay(od), P_OrderSku(od)) := 
+                	   P_DCDaySKUOrderQuantityTemp(P_DCServingRegionSKU(P_OrderRegion(od), P_OrderSku(od)), P_OrderDay(od), P_OrderSku(od)) + P_OrderQuantity(od);
+                
+                
+                
+                	   P_TotalOrderQuantityRegion(P_OrderRegion(od), P_OrderSku(od)) := P_TotalOrderQuantityRegion(P_OrderRegion(od), P_OrderSku(od)) + P_OrderQuantity(od);
+                
+                	   P_RegionDaySKUOrderQuantityTemp(P_OrderRegion(od), P_OrderDay(od), P_OrderSku(od)) := 
+                	   P_RegionDaySKUOrderQuantityTemp(P_OrderRegion(od), P_OrderDay(od), P_OrderSku(od)) + P_OrderQuantity(od);	   
+                	endfor;
+                else
+                !YOY
+                	for(od | TimeslotCharacteristic(P_OrderDay(od), 'month') in S_PullPlanningHorizonMonths 
+                		 and P_IsDCServingSKU(P_DCServingRegionSKU(P_OrderRegion(od), P_OrderSku(od)), P_OrderSku(od))) do
+                		 !and P_IsDCServingSKU(  P_RegionServingDC(P_OrderRegion(od)),P_OrderSku(od))) do
+                	   P_TotalOrderQuantity(P_OrderSku(od)) := P_TotalOrderQuantity(P_OrderSku(od)) + P_OrderQuantity(od);
+                
+                	   P_DCDaySKUOrderQuantityTemp(P_DCServingRegionSKU(P_OrderRegion(od), P_OrderSku(od)), P_OrderDay(od), P_OrderSku(od)) := 
+                	   P_DCDaySKUOrderQuantityTemp(P_DCServingRegionSKU(P_OrderRegion(od), P_OrderSku(od)), P_OrderDay(od), P_OrderSku(od)) + P_OrderQuantity(od);
+                
+                
+                
+                	   P_TotalOrderQuantityRegion(P_OrderRegion(od), P_OrderSku(od)) := P_TotalOrderQuantityRegion(P_OrderRegion(od), P_OrderSku(od)) + P_OrderQuantity(od);
+                
+                	   P_RegionDaySKUOrderQuantityTemp(P_OrderRegion(od), P_OrderDay(od), P_OrderSku(od)) := 
+                	   P_RegionDaySKUOrderQuantityTemp(P_OrderRegion(od), P_OrderDay(od), P_OrderSku(od)) + P_OrderQuantity(od);	   
+                	endfor;
+                endif;
+                
+                
+                
+                !aggregate to the day
+                for((dc, SKU, day) | day >= P_PlanningHorizonStart and day <= P_PlanningHorizonEnd + P_AdditionalDaysToForcast) do
+                   for(day1 | P_DCDaySKUOrderQuantityTemp(dc, day1, SKU) > 0) do
+                      if(TimeslotCharacteristic(day1, 'monthday') = TimeslotCharacteristic(day, 'monthday')) then
+                         P_DCDaySKUOrderQuantity(dc, day, SKU) := P_DCDaySKUOrderQuantity(dc, day, SKU) + P_DCDaySKUOrderQuantityTemp(dc, day1, SKU);
+                      endif;
+                   endfor;
+                endfor;
+                
+                !calculate ratio
+                for((dc, SKU, day) | day >= P_PlanningHorizonStart and day <= P_PlanningHorizonEnd + P_AdditionalDaysToForcast
+                		     and P_DCDaySKUOrderQuantity(dc, day, SKU) > 0 and P_TotalOrderQuantity(SKU) > 0) do
+                        if(P_ISMOM) then
+                   	    P_MOMResultRatio(DC, day, SKU) := P_DCDaySKUOrderQuantity(dc, day, SKU) / P_TotalOrderQuantity(SKU);
+                   	else
+                   	    P_YOYResultRatio(DC, day, SKU) := P_DCDaySKUOrderQuantity(dc, day, SKU) / P_TotalOrderQuantity(SKU);
+                   	endif;    
+                endfor;
+                
+                
+                
+                ! Region
+                !aggregate to the day
+                for((re, SKU, day) | day >= P_PlanningHorizonStart and day <= P_PlanningHorizonEnd + P_AdditionalDaysToForcast) do
+                   for(day1 | P_RegionDaySKUOrderQuantityTemp(re, day1, SKU) > 0) do
+                      if(TimeslotCharacteristic(day1, 'monthday') = TimeslotCharacteristic(day, 'monthday')) then
+                         P_RegionDaySKUOrderQuantity(re, day, SKU) := P_RegionDaySKUOrderQuantity(re, day, SKU) + P_RegionDaySKUOrderQuantityTemp(re, day1, SKU);
+                      endif;
+                   endfor;
+                endfor;
+                
+                !calculate ratio
+                for((re, SKU, day) | day >= P_PlanningHorizonStart and day <= P_PlanningHorizonEnd + P_AdditionalDaysToForcast
+                		     and P_RegionDaySKUOrderQuantity(re, day, SKU) > 0 and P_TotalOrderQuantityRegion(re, SKU) > 0) do
+                        if(P_ISMOM) then
+                   	    P_RegionMOMResultRatio(re, day, SKU) := P_RegionDaySKUOrderQuantity(re, day, SKU) / P_TotalOrderQuantityRegion(re, SKU);
+                   	else
+                   	    P_RegionYOYResultRatio(re, day, SKU) := P_RegionDaySKUOrderQuantity(re, day, SKU) / P_TotalOrderQuantityRegion(re, SKU);
+                   	endif;    
+                endfor;
+            }
+        }
+        Procedure PullBothCalculation {
+            Body: {
+                for (DC, SKU) do
+                	P_TheDC := DC;
+                	P_TheSKU := SKU;
+                
+                	!Sequence 1
+                	P_TMR(P_TheSKU) := 1;
+                	P_TMC(P_TheSKU) := 0;
+                	P_FR(P_TheSKU) := 0;
+                	P_FC(P_TheSKU) := 0;
+                	PullCases;
+                
+                	!Sequence 2
+                	if ((P_ISMOM = 1 and sum(day, P_MOMResult(P_TheDC, day, P_TheSKU)) = 0)
+                	    or (P_ISMOM = 0 and sum(day, P_YOYResult(P_TheDC, day, P_TheSKU)) = 0)) then
+                		P_TMR(P_TheSKU) := 0;
+                		P_TMC(P_TheSKU) := 1;
+                		P_FR(P_TheSKU) := 0;
+                		P_FC(P_TheSKU) := 0;
+                		PullCases;
+                	endif;
+                
+                	!Sequence 3
+                	if ((P_ISMOM = 1 and sum(day, P_MOMResult(P_TheDC, day, P_TheSKU)) = 0)
+                	    or (P_ISMOM = 0 and sum(day, P_YOYResult(P_TheDC, day, P_TheSKU)) = 0)) then
+                		P_TMR(P_TheSKU) := 0;
+                		P_TMC(P_TheSKU) := 0;
+                		P_FR(P_TheSKU) := 1;
+                		P_FC(P_TheSKU) := 0;
+                		PullCases;
+                	endif;	
+                
+                	!Sequence 4
+                	if ((P_ISMOM = 1 and sum(day, P_MOMResult(P_TheDC, day, P_TheSKU)) = 0)
+                	    or (P_ISMOM = 0 and sum(day, P_YOYResult(P_TheDC, day, P_TheSKU)) = 0)) then
+                		P_TMR(P_TheSKU) := 0;
+                		P_TMC(P_TheSKU) := 0;
+                		P_FR(P_TheSKU) := 0;
+                		P_FC(P_TheSKU) := 1;
+                		PullCases;
+                	endif;
+                endfor;
+            }
+        }
+        Procedure PullCases {
+            Body: {
+                empty P_UseRegion;
+                
+                if (P_TMR(P_TheSKU)) then
+                	P_UseRegion := 1;
+                	P_Region(re, P_TheSKU, P_DayToMonth(day)) := P_TMRegion(re, P_TheSKU, P_DayToMonth(day));
+                elseif (P_TMC(P_TheSKU)) then
+                	P_UseRegion := 0;
+                	P_Country(P_TheSKU, P_DayToMonth(day)) := P_TMCountry(P_TheSKU, P_DayToMonth(day));	
+                elseif (P_FR(P_TheSKU)) then
+                	P_UseRegion := 1;
+                	P_Region(re, P_TheSKU, P_DayToMonth(day)) := P_ForecastRegion(re, P_TheSKU, P_DayToMonth(day));
+                elseif (P_FC(P_TheSKU)) then
+                	P_UseRegion := 0;
+                	P_Country(P_TheSKU, P_DayToMonth(day)) := P_Forecast(P_TheSKU, P_DayToMonth(day));
+                endif;
+                
+                
+                
+                if (P_UseRegion) then
+                	if (P_ISMOM) then
+                		P_RegionOResultRatio(re, day, P_TheSKU) := P_RegionMOMResultRatio(re, day, P_TheSKU);
+                	else
+                		P_RegionOResultRatio(re, day, P_TheSKU) := P_RegionYOYResultRatio(re, day, P_TheSKU);
+                	endif;
+                else
+                	if (P_ISMOM) then
+                		P_OResultRatio(P_TheDC, day, P_TheSKU) := P_MOMResultRatio(P_TheDC, day, P_TheSKU);
+                	else
+                		P_OResultRatio(P_TheDC, day, P_TheSKU) := P_YOYResultRatio(P_TheDC, day, P_TheSKU);
+                	endif;
+                endif;
+                
+                PullCommon;
+            }
+        }
+        Procedure PullCommon {
+            Body: {
+                empty P_RegionOResult, P_OResult;
+                
+                if (P_UseRegion) then
+                	for(day | day >= P_PlanningHorizonStart and day <= P_PlanningHorizonEnd + P_AdditionalDaysToForcast) do
+                    		if(sum(re, P_Region(re, P_TheSKU, P_DayToMonth(day))) > 0) then
+                    			for(re | P_DCServingRegionSKU(re, P_TheSKU) = P_TheDC) do
+                        			P_RegionOResult(re, day, P_TheSKU) := P_Region(re, P_TheSKU, P_DayToMonth(day)) * P_RegionOResultRatio(re, day, P_TheSKU);
+                
+                        			P_OResult(P_TheDC, day, P_TheSKU) := P_OResult(P_TheDC, day, P_TheSKU) + P_RegionOResult(re, day, P_TheSKU);
+                        		endfor;
+                    		endif;
+                	endfor;
+                else
+                	for(day | day >= P_PlanningHorizonStart and day <= P_PlanningHorizonEnd + P_AdditionalDaysToForcast) do
+                		if(P_Country(P_TheSKU, P_DayToMonth(day)) > 0) then
+                       			P_OResult(P_TheDC, day, P_TheSKU) := P_Country(P_TheSKU, P_DayToMonth(day)) * P_OResultRatio(P_TheDC, day, P_TheSKU);
+                       		endif;
+                       	endfor;
+                endif;
+                
+                if (P_ISMOM = 1 and sum(day, P_MOMResult(P_TheDC, day, P_TheSKU)) = 0) then
+                	P_MOMResult(P_TheDC, day, P_TheSKU) := P_OResult(P_TheDC, day, P_TheSKU);
+                elseif (P_ISMOM = 0 and sum(day, P_YOYResult(P_TheDC, day, P_TheSKU) = 0)) then
+                	P_YOYResult(P_TheDC, day, P_TheSKU) := P_OResult(P_TheDC, day, P_TheSKU);
+                endif;
+            }
+        }
+        DeclarationSection PullParameterDeclaration {
+            Parameter P_AdditionalDaysToForcast;
+            ElementParameter P_OrderRegion {
+                IndexDomain: od;
+                Range: S_Region;
+            }
+            ElementParameter P_OrderSku {
+                IndexDomain: od;
+                Range: S_SKU;
+            }
+            ElementParameter P_OrderDay {
+                IndexDomain: od;
+                Range: Cal_Days;
+            }
+            Parameter P_OrderQuantity {
+                IndexDomain: od;
+            }
+            ElementParameter P_OrderStatus {
+                IndexDomain: od;
+                Range: S_OrderStatus;
+            }
+            Parameter P_Forecast {
+                IndexDomain: (SKU,mon);
+            }
+            Parameter P_ForecastRegion {
+                IndexDomain: (re,SKU,mon);
+            }
+            Parameter P_TMCountry {
+                IndexDomain: (SKU,mon);
+            }
+            Parameter P_TMRegion {
+                IndexDomain: (re, SKU, mon);
+            }
+            Parameter P_TotalOrderQuantity {
+                IndexDomain: SKU;
+            }
+            Parameter P_TotalOrderQuantityRegion {
+                IndexDomain: (re,SKU);
+            }
+            Parameter P_DCDaySKUOrderQuantityTemp {
+                IndexDomain: (DC,day,SKU);
+            }
+            Parameter P_RegionDaySKUOrderQuantityTemp {
+                IndexDomain: (re,day,SKU);
+            }
+            Parameter P_DCDaySKUOrderQuantity {
+                IndexDomain: (DC,day,SKU);
+            }
+            Parameter P_RegionDaySKUOrderQuantity {
+                IndexDomain: (re,day,SKU);
+            }
+            Parameter P_ISMOM;
+            Set S_PullPlanningHorizonMonths {
+                SubsetOf: Integers;
+            }
+            ElementParameter P_EarliestMonthToConsider {
+                Range: Cal_Months;
+            }
+        }
+        DeclarationSection PullParameterCommon {
+            ElementParameter P_TheDC {
+                Range: S_DC;
+            }
+            ElementParameter P_TheSKU {
+                Range: S_SKU;
+            }
+            Parameter P_TMR {
+                IndexDomain: SKU;
+            }
+            Parameter P_TMC {
+                IndexDomain: SKU;
+            }
+            Parameter P_FR {
+                IndexDomain: SKU;
+            }
+            Parameter P_FC {
+                IndexDomain: SKU;
+            }
+            Parameter P_UseRegion;
+            Parameter P_Region {
+                IndexDomain: (re,SKU,mon);
+            }
+            Parameter P_RegionOResultRatio {
+                IndexDomain: (re,day,SKU);
+            }
+            Parameter P_Country {
+                IndexDomain: (SKU,mon);
+            }
+            Parameter P_OResultRatio {
+                IndexDomain: (DC,day,SKU);
+            }
+            Parameter P_RegionOResult {
+                IndexDomain: (re,day,SKU);
+            }
+            Parameter P_OResult {
+                IndexDomain: (DC,day,SKU);
+            }
+        }
+        DeclarationSection PullResultDeclaration {
+            Parameter P_MOMResultRatio {
+                IndexDomain: (DC,day,SKU);
+            }
+            Parameter P_RegionMOMResultRatio {
+                IndexDomain: (re,day,SKU);
+            }
+            Parameter P_YOYResultRatio {
+                IndexDomain: (DC,day,SKU);
+            }
+            Parameter P_RegionYOYResultRatio {
+                IndexDomain: (re,day,SKU);
+            }
+            Parameter P_RegionMOMResult {
+                IndexDomain: (re,day,SKU);
+            }
+            Parameter P_RegionYOYResult {
+                IndexDomain: (re,day,SKU);
+            }
+            Parameter P_MOMResult {
+                IndexDomain: (DC,day,SKU);
+            }
+            Parameter P_YOYResult {
+                IndexDomain: (DC,day,SKU);
+            }
+            Parameter P_UseMOMResult {
+                InitialData: 1;
+            }
+            Parameter P_UseYOYResult {
+                InitialData: 0;
+            }
+        }
+        Procedure ChooseMOM {
+            Body: {
+                if (P_UseMOMResult = 0) then
+                	P_UseYOYResult := 1;
+                else
+                	P_UseYOYResult := 0;
+                endif;
+            }
+        }
+        Procedure ChooseYOY {
+            Body: {
+                if (P_UseYOYResult = 0) then
+                	P_UseMOMResult := 1;
+                else
+                	P_UseMOMResult := 0;
+                endif;
+            }
+        }
+    }
+    Section PushSection {
+        Procedure CalculatePush {
+            Body: {
+                empty P_TotalCurrentVolume, P_PushVolume;
+                
+                for(pl, sg) do
+                   P_TotalCurrentVolume := 0;
+                   for(SKU | P_SKUProducingPlant(SKU) = pl and P_SKUStorageGroup(SKU) = sg 
+                   					   and P_UnitCoversionRate(SKU, P_DefaultUnit, P_PlantStoringCapacityRawUnit(pl, sg)) > 0) do
+                      P_TotalCurrentVolume := P_TotalCurrentVolume 
+                      			      + P_SKUPlantCurrentStock(SKU) / P_UnitCoversionRate(SKU, P_DefaultUnit, P_PlantStoringCapacityRawUnit(pl, sg));
+                   endfor;
+                
+                   P_PushVolume(pl, sg) := P_TotalCurrentVolume - P_PlantStoringCapacity(pl, sg) * P_PreferedStockLevel(pl, sg);
+                
+                   P_PushVolume(pl, sg)  := ceil(P_PushVolume(pl, sg));
+                
+                   if(P_PushVolume(pl, sg) < 0) then
+                      P_PushVolume(pl,sg) := 0;
+                   endif;
+                endfor;
+            }
+        }
+        DeclarationSection PushParameterDeclaration {
+            Parameter P_IsPushResultEditable {
+                Range: binary;
+            }
+            Parameter P_IsPushResultReadOnly {
+                Definition: 1-P_IsPushResultEditable;
+            }
+            Parameter P_TotalCurrentVolume;
+            Parameter P_PlantStoringCapacity {
+                IndexDomain: (pl,sg);
+            }
+            Parameter P_PreferedStockLevel {
+                IndexDomain: (pl,sg);
+            }
+        }
+        DeclarationSection PushResultDeclaration {
+            Parameter P_PushVolume {
+                IndexDomain: (pl,sg);
+            }
+        }
+    }
+    Section StockAllocationOptimization {
+        DeclarationSection StockAllocationDeclaration {
+            Parameter P_DCTgPriority {
+                IndexDomain: (DC,tg);
+            }
+            Parameter P_Demand {
+                IndexDomain: (DC,SKU,day);
+            }
+            Parameter P_DcStoringCapacity {
+                IndexDomain: (DC,sg);
+            }
+            Parameter P_MinOrderQuantity {
+                IndexDomain: SKU;
+            }
+            Parameter P_DesiredCoverageDaysMin {
+                IndexDomain: (DC,SKU);
+            }
+            Parameter P_DesiredCoverageDaysMax {
+                IndexDomain: (DC,SKU);
+            }
+            Parameter P_PlantMaxDailyHandlingQuantity {
+                IndexDomain: pl;
+            }
+            Parameter P_DcCurrentStock {
+                IndexDomain: (DC,SKU);
+            }
+            Parameter P_SacrificePercentage;
+            Parameter P_DcSKUPriority1 {
+                IndexDomain: (DC,SKU);
+            }
+            Parameter P_DcSKUPriority2 {
+                IndexDomain: (DC,SKU);
+            }
+            Parameter P_BIgM;
+            Parameter P_BIgM2;
+            ElementParameter P_LastDayofWeek {
+                IndexDomain: w | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek);
+                Range: Cal_Days;
+                Definition: first( day | P_DayToWeek(day) = w and TimeslotCharacteristic(day,'weekday') = 7);
+                Comment: {
+                    "last( day | TimeslotCharacteristic(w,\'week\') =
+                               TimeslotCharacteristic(day,\'week\')
+                               and
+                               TimeslotCharacteristic(w,\'year\') =
+                               TimeslotCharacteristic(day,\'year\') )"
+                }
+            }
+            Parameter P_NumWorkingDaysInWeek {
+                IndexDomain: w | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek);
+                Definition: {
+                    5 - sum(day | day >= P_PlanningHorizonStart and day <= P_PlanningHorizonEnd
+                    	      and P_DayToWeek(day) = w and TimeslotCharacteristic(day,'weekday') <= 5,
+                    	      P_IsAccountClosingDate(day))
+                }
+            }
+            Parameter P_UserFixedSTO {
+                IndexDomain: (DC,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0 and P_IsDCServingSKU(DC, SKU) = 1);
+                Range: integer;
+            }
+            Parameter P_UserFixedSTORawQuantity {
+                IndexDomain: (DC,SKU,planw) | (P_IsSKUExcluded(SKU) = 0 and P_IsDCServingSKU(DC, SKU) = 1);
+                Range: integer;
+                InitialData: 0;
+            }
+            ElementParameter P_UserFixedSTORawUnit {
+                IndexDomain: (DC,SKU,planw) | (P_IsSKUExcluded(SKU) = 0 and P_IsDCServingSKU(DC, SKU) = 1);
+                Range: S_Unit;
+                InitialData: 'PCS';
+            }
+        }
+        DeclarationSection StockAllocationDecisionVariables {
+            Variable V_Replenishment {
+                IndexDomain: (DC,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0);
+                Range: nonnegative;
+            }
+            Variable V_EOH {
+                IndexDomain: (DC,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0);
+                Range: free;
+            }
+            Variable V_ExcessDCStoringCapacity {
+                IndexDomain: (DC,sg);
+                Range: nonnegative;
+            }
+            Variable V_UnsatisfiedPush {
+                IndexDomain: (pl,sg);
+                Range: nonnegative;
+            }
+            Variable V_HasSkuReplenishment {
+                IndexDomain: (DC,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0);
+                Range: binary;
+            }
+            Variable V_HasTgReplenishment {
+                IndexDomain: (DC,tg,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek);
+                Range: binary;
+            }
+            Variable V_Shortage1 {
+                IndexDomain: (DC,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0);
+                Range: nonnegative;
+            }
+            Variable V_Shortage2 {
+                IndexDomain: (DC,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0);
+                Range: nonnegative;
+            }
+            Variable V_ExcessDcMaximumStockCoverageDays {
+                IndexDomain: (DC,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0);
+                Range: nonnegative;
+            }
+            Variable V_UserFixSlack {
+                IndexDomain: (DC,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0 and P_IsDCServingSKU(DC, SKU) = 1 and P_UserFixedSTO(DC, SKU, w) > 0);
+                Range: nonnegative;
+            }
+            Variable V_UserFixExcess {
+                IndexDomain: (DC,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0 and P_IsDCServingSKU(DC, SKU) = 1 and P_UserFixedSTO(DC, SKU, w) > 0);
+                Range: nonnegative;
+            }
+        }
+        DeclarationSection StockAllocationConstraints {
+            Constraint C_DcStoringCapacity {
+                IndexDomain: (DC,sg,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek);
+                Definition: {
+                    sum(SKU | P_SKUStorageGroup(SKU) = sg and P_IsSKUExcluded(SKU) = 0 and P_UnitCoversionRate(SKU, P_DefaultUnit, P_DcStoringCapacityRawUnit(DC, sg)) > 0,
+                    	  V_EOH(DC, SKU, w) / P_UnitCoversionRate(SKU, P_DefaultUnit, P_DcStoringCapacityRawUnit(DC, sg)))
+                    	  - V_ExcessDCStoringCapacity(DC, sg) <= P_DcStoringCapacity(DC, sg)
+                }
+            }
+            Constraint C_DcStockFlow1 {
+                IndexDomain: (DC, SKU) | P_IsSKUExcluded(SKU) = 0;
+                Definition: {
+                    V_EOH(DC, SKU, P_DayToWeek(P_PlanningHorizonStart)) 
+                    	= P_DcCurrentStock(DC, SKU)
+                    	  - sum(day | (day >= P_PlanningHorizonStart and day <= P_LastDayofWeek(P_DayToWeek(P_PlanningHorizonStart))), P_Demand(DC, SKU, day))
+                     	  + V_Replenishment(DC, SKU, P_DayToWeek(P_PlanningHorizonStart))
+                }
+            }
+            Constraint C_DcStockFlow2 {
+                IndexDomain: (DC, SKU, w) | w >= P_DayToWeek(P_PlanningHorizonStart) and w <= P_DayToWeek(P_PlanningHorizonEnd) - 1 and P_IsSKUExcluded(SKU) = 0;
+                Definition: {
+                    V_EOH(DC, SKU, w + 1) = V_EOH(DC, SKU, w)
+                     			- sum(day | (P_DayToWeek(day) = w + 1 and day <= P_PlanningHorizonEnd), P_Demand(DC, SKU, day))
+                     			+ V_Replenishment(DC, SKU, w + 1)
+                }
+                Comment: "(DC, SKU, w) | w >= P_DayToWeek(P_PlanningHorizonStart) and w <= P_PlanningHorizonEndWeek - 1";
+            }
+            Constraint C_PlantPushOut {
+                IndexDomain: (pl, sg);
+                Definition: {
+                    sum((DC, SKU, w) | P_SKUProducingPlant(SKU) = pl and P_SKUStorageGroup(SKU) = sg and w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek
+                    		   and P_IsSKUExcluded(SKU) = 0 and P_UnitCoversionRate(SKU, P_DefaultUnit,P_PlantStoringCapacityRawUnit(pl, sg)) > 0,
+                    		   V_Replenishment(DC, SKU, w) / P_UnitCoversionRate(SKU, P_DefaultUnit,P_PlantStoringCapacityRawUnit(pl, sg)))
+                    		   + V_UnsatisfiedPush(pl, sg) >= P_PushVolume(pl, sg)
+                }
+            }
+            Constraint C_DcMinimumOrderQuantity {
+                IndexDomain: (DC, SKU, w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0);
+                Definition: V_Replenishment(DC, SKU, w) >= P_MinOrderQuantity(SKU) * V_HasSkuReplenishment(DC, SKU, w);
+            }
+            Constraint C_DcMinimumStockCoverageDays1 {
+                IndexDomain: (DC, SKU, w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0);
+                Definition: {
+                    V_EOH(DC, SKU, w) + V_Shortage1(DC, SKU, w) >=
+                    	 sum(day | P_LastDayofWeek(w) + 1 <= day and day <= P_LastDayofWeek(w) + 1 + P_DesiredCoverageDaysMin(DC, SKU) - 1, P_Demand(DC, SKU, day))
+                }
+            }
+            Constraint C_DcMinimumStockCoverageDays2 {
+                IndexDomain: (DC, SKU, w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0);
+                Definition: {
+                    V_EOH(DC, SKU, w) + V_Shortage2(DC, SKU, w) >= P_SacrificePercentage * 
+                    	 sum(day | P_LastDayofWeek(w) + 1 <= day and day <= P_LastDayofWeek(w) + 1 + P_DesiredCoverageDaysMin(DC, SKU) - 1, P_Demand(DC, SKU, day))
+                }
+            }
+            Constraint C_DcMaximumStockCoverageDays {
+                IndexDomain: (DC, SKU, w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0);
+                Definition: {
+                    V_EOH(DC, SKU, w) - V_ExcessDcMaximumStockCoverageDays(DC, SKU, w) <=
+                    	 sum(day | P_LastDayofWeek(w) + 1 <= day and day <= P_LastDayofWeek(w) + 1 + P_DesiredCoverageDaysMax(DC, SKU) - 1, P_Demand(DC, SKU, day))
+                }
+            }
+            Constraint C_PlantMaximumDailyHandlingQuantity {
+                IndexDomain: (pl, w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek);
+                Definition: {
+                    sum((DC, SKU) | P_SKUProducingPlant(SKU) = pl and P_IsSKUExcluded(SKU) = 0
+                    		and P_UnitCoversionRate(SKU, P_DefaultUnit, P_PlantMaxDailyHandlingQuantityRawUnit(pl)) > 0,
+                    		V_Replenishment(DC, SKU, w) * P_PlantHandingCapacityConsumptionRate(SKU)
+                    		 / P_UnitCoversionRate(SKU, P_DefaultUnit, P_PlantMaxDailyHandlingQuantityRawUnit(pl)))
+                    		<= P_NumWorkingDaysInWeek(w) * P_PlantMaxDailyHandlingQuantity(pl)
+                }
+            }
+            Constraint C_PlantCurrentStock {
+                IndexDomain: SKU | P_IsSKUExcluded(SKU) = 0;
+                Definition: {
+                    sum((DC, w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonStartWeek + 1), V_Replenishment(DC, SKU, w)) <= P_SKUPlantCurrentStock(SKU)
+                    !sum((DC, w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek), V_Replenishment(DC, SKU, w)) <= P_SKUPlantCurrentStock(SKU)
+                }
+            }
+            Constraint C_SAVariableLinkage1 {
+                IndexDomain: (DC, SKU, w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0);
+                Definition: V_Replenishment(DC, SKU, w) <= P_BIgM * V_HasSkuReplenishment(DC, SKU, w);
+            }
+            Constraint C_SAVariableLinkage21 {
+                IndexDomain: (DC, tg, w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek);
+                Definition: {
+                    sum(SKU | P_SKUTransportationGroup(SKU) = tg and P_IsSKUExcluded(SKU) = 0,
+                    	  V_HasSkuReplenishment(DC, SKU, w)) <= P_BIgM2 * V_HasTgReplenishment(DC, tg, w)
+                }
+            }
+            Constraint C_SAVariableLinkage22 {
+                IndexDomain: (DC, tg, w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek);
+                Definition: {
+                    sum(SKU | P_SKUTransportationGroup(SKU) = tg and P_IsSKUExcluded(SKU) = 0,
+                    	  V_HasSkuReplenishment(DC, SKU, w)) >= V_HasTgReplenishment(DC, tg, w)
+                }
+            }
+            Constraint C_UserFix {
+                IndexDomain: (DC,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0 and P_IsDCServingSKU(DC, SKU) = 1 and P_UserFixedSTO(DC, SKU, w) > 0);
+                Definition: V_Replenishment(DC, SKU, w) + V_UserFixSlack(DC, SKU, w) - V_UserFixExcess(DC, SKU, w) = P_UserFixedSTO(DC, SKU, w);
+            }
+            Constraint C_V_ReplenishmentFrequency {
+                Definition: {
+                    V_ReplenishmentFrequency = 
+                    sum((DC, tg, w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek), P_DCTgPriority(DC, tg) * V_HasTgReplenishment(DC, tg, w))
+                }
+            }
+            Constraint C_V_ShortagePenalty1 {
+                Definition: {
+                    V_ShortagePenalty1 = 
+                    sum((DC, SKU, w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0),
+                    		    P_DcSKUPriority1(DC, SKU) * V_Shortage1(DC, SKU, w))
+                }
+            }
+            Constraint C_V_ShortagePenalty2 {
+                Definition: {
+                    V_ShortagePenalty2 =
+                    sum((DC, SKU, w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0),
+                    		   P_DcSKUPriority2(DC, SKU) * V_Shortage2(DC, SKU, w))
+                }
+            }
+            Constraint C_V_UnsatisfiedPushPenalty {
+                Definition: V_UnsatisfiedPushPenalty = sum((pl, sg), V_UnsatisfiedPush(pl, sg));
+            }
+            Constraint C_V_ExcessDCStoringCapacityPenalty {
+                Definition: V_ExcessDCStoringCapacityPenalty = sum((DC, sg), V_ExcessDCStoringCapacity(DC, sg));
+            }
+            Constraint C_V_ExcessDcMaximumStockCoverageDaysPenalty {
+                Definition: {
+                    V_ExcessDcMaximumStockCoverageDaysPenalty 
+                    = sum((DC, SKU, w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0),
+                                          V_ExcessDcMaximumStockCoverageDays(DC, SKU, w))
+                }
+            }
+            Constraint C_V_UserFixPenalty {
+                Definition: {
+                    V_UserFixPenalty 
+                    = sum((DC, SKU, w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek 
+                    		      and P_IsSKUExcluded(SKU) = 0 and P_IsDCServingSKU(DC, SKU) = 1 and P_UserFixedSTO(DC, SKU, w) > 0),
+                          V_UserFixSlack(DC, SKU, w) + V_UserFixExcess(DC, SKU, w))
+                }
+            }
+            Constraint C_V_StockAllocationObj {
+                Definition: {
+                    V_StockAllocationObj = V_ReplenishmentFrequency + V_ShortagePenalty1 + V_ShortagePenalty2
+                    		     + V_UnsatisfiedPushPenalty + V_ExcessDCStoringCapacityPenalty
+                    		     + 0.000001 * V_ExcessDcMaximumStockCoverageDaysPenalty
+                    		     + V_UserFixPenalty;
+                }
+            }
+        }
+        DeclarationSection StockAllocationObjectives {
+            Variable V_ReplenishmentFrequency {
+                Range: nonnegative;
+                Definition: {
+                    !sum((DC, tg, w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek), P_DCTgPriority(DC, tg) * V_HasTgReplenishment(DC, tg, w))
+                }
+            }
+            Variable V_ShortagePenalty1 {
+                Range: nonnegative;
+                Definition: {
+                    !sum((DC, SKU, w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0),
+                    !		    P_DcSKUPriority1(DC, SKU) * V_Shortage1(DC, SKU, w))
+                }
+            }
+            Variable V_ShortagePenalty2 {
+                Range: nonnegative;
+                Definition: {
+                    !sum((DC, SKU, w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0),
+                    !		   P_DcSKUPriority2(DC, SKU) * V_Shortage2(DC, SKU, w))
+                }
+            }
+            Variable V_UnsatisfiedPushPenalty {
+                Range: nonnegative;
+                Definition: {
+                    !sum((pl, sg), V_UnsatisfiedPush(pl, sg))
+                }
+            }
+            Variable V_ExcessDCStoringCapacityPenalty {
+                Range: nonnegative;
+                Definition: {
+                    !sum((DC, sg), V_ExcessDCStoringCapacity(DC, sg))
+                }
+                Comment: "sum((DC, sg), V_ExcessDCStoringCapacity(DC, sg))";
+            }
+            Variable V_ExcessDcMaximumStockCoverageDaysPenalty {
+                Range: nonnegative;
+                Comment: "sum((DC, sg), V_ExcessDCStoringCapacity(DC, sg))";
+            }
+            Variable V_UserFixPenalty {
+                Range: nonnegative;
+            }
+            Variable V_StockAllocationObj {
+                Range: free;
+            }
+        }
+        DeclarationSection StockAllocationMathModel {
+            Set S_StockAllocationVariables {
+                SubsetOf: AllVariables;
+                Definition: {
+                    data {
+                    V_Replenishment
+                    ,V_EOH
+                    ,V_ExcessDCStoringCapacity
+                    ,V_UnsatisfiedPush
+                    ,V_HasSkuReplenishment
+                    ,V_HasTgReplenishment
+                    ,V_Shortage1
+                    ,V_Shortage2
+                    ,V_ExcessDcMaximumStockCoverageDays
+                    ,V_UserFixSlack
+                    ,V_UserFixExcess
+                    ,V_ReplenishmentFrequency
+                    ,V_ShortagePenalty1
+                    ,V_ShortagePenalty2
+                    ,V_UnsatisfiedPushPenalty
+                    ,V_ExcessDCStoringCapacityPenalty
+                    ,V_ExcessDcMaximumStockCoverageDaysPenalty
+                    ,V_UserFixPenalty
+                    ,V_StockAllocationObj
+                    }
+                }
+            }
+            Set S_StockAllocationConstraints {
+                SubsetOf: AllConstraints;
+                Definition: {
+                    data {
+                    C_DcStoringCapacity
+                    ,C_DcStockFlow1
+                    ,'C_DcStockFlow2'
+                    ,'C_PlantPushOut'
+                    ,'C_DcMinimumOrderQuantity'
+                    ,'C_DcMinimumStockCoverageDays1'
+                    ,'C_DcMinimumStockCoverageDays2'
+                    ,'C_DcMaximumStockCoverageDays'
+                    ,'C_PlantMaximumDailyHandlingQuantity'
+                    ,'C_PlantCurrentStock'
+                    ,C_SAVariableLinkage1
+                    ,C_SAVariableLinkage21
+                    ,C_SAVariableLinkage22
+                    ,C_UserFix
+                    ,C_V_ReplenishmentFrequency
+                    ,C_V_ShortagePenalty1
+                    ,C_V_ShortagePenalty2
+                    ,C_V_UnsatisfiedPushPenalty
+                    ,C_V_ExcessDCStoringCapacityPenalty
+                    ,C_V_ExcessDcMaximumStockCoverageDaysPenalty
+                    ,C_V_UserFixPenalty
+                    ,C_V_StockAllocationObj
+                    }
+                }
+            }
+            MathematicalProgram M_StockAllocationModel {
+                Objective: V_StockAllocationObj;
+                Direction: minimize;
+                Constraints: S_StockAllocationConstraints;
+                Variables: S_StockAllocationVariables;
+                Type: MIP;
+            }
+        }
+        DeclarationSection StockAllocationResult {
+            StringParameter P_SAODisplayDescription1 {
+                IndexDomain: (DC, SKU, w);
+            }
+            StringParameter P_SAODisplayDescription2 {
+                IndexDomain: (DC, SKU, w);
+            }
+        }
+    }
+    Section TruckAllocationOptimization {
+        DeclarationSection TruckAllocationSet {
+            Set S_TransportationMode {
+                Index: tm;
+            }
+            Set S_TMforTG {
+                IndexDomain: tg;
+                SubsetOf: S_TransportationMode;
+            }
+            Set S_TruckTypeModel {
+                Index: tkt;
+            }
+            Set S_TruckTypeRaw {
+                Index: tktraw;
+            }
+            Set S_Truck {
+                SubsetOf: Integers;
+                Index: tk;
+            }
+        }
+        DeclarationSection TruckAllocationDeclaration {
+            Parameter P_TruckNumber;
+            Parameter P_NumberOfTrucksForEachType;
+            Parameter P_RunningIndex;
+            Parameter P_TotalNumberOfTrucks;
+            Parameter P_Replenishment {
+                IndexDomain: (DC,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0);
+                Range: integer;
+            }
+            ElementParameter P_TruckType {
+                IndexDomain: tk;
+                Range: S_TruckTypeModel;
+            }
+            ElementParameter P_TransportationMode {
+                IndexDomain: tkt;
+                Range: S_TransportationMode;
+            }
+            Parameter P_TruckCapacity {
+                IndexDomain: tkt;
+            }
+            ElementParameter P_TruckCapacityUnit {
+                IndexDomain: tkt;
+                Range: S_Unit;
+            }
+            Parameter P_BigTransportationCost;
+            Parameter P_TruckTransporationCost {
+                IndexDomain: (pl,DC,tkt);
+            }
+            ElementParameter P_RawTruckType {
+                IndexDomain: tkt;
+                Range: S_TruckTypeRaw;
+            }
+            Parameter P_RawTruckTranpostationCost {
+                IndexDomain: (tktraw,pl,DC);
+            }
+            Parameter P_BigM3;
+            ElementParameter P_ReplenishmentUnit {
+                IndexDomain: (DC,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0);
+                Range: S_Unit;
+            }
+            ElementParameter P_UnitOfTransportationMode {
+                IndexDomain: tm;
+                Range: S_Unit;
+            }
+            ElementParameter P_UnitOfTransportationGroup {
+                IndexDomain: tg;
+                Range: S_Unit;
+            }
+            ElementParameter P_UnitOfTGQuantity {
+                IndexDomain: (pl, DC, w, tktraw, tk, tg) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_TransportationMode(P_TruckType(tk)) in S_TMforTG(tg) and P_TruckTransporationCost(pl, DC, P_TruckType(tk)) < P_BigTransportationCost and P_RawTruckType(P_TruckType(tk)) = tktraw);
+                Range: S_Unit;
+            }
+            ElementParameter P_UnitOfSKUQuantity {
+                IndexDomain: (pl,DC,w,tktraw,tk,SKU) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_SKUProducingPlant(SKU) = pl and P_IsDCServingSKU(DC, SKU) = 1 and P_IsSKUExcluded(SKU) = 0 and P_TruckTransporationCost(pl, DC, P_TruckType(tk)) < P_BigTransportationCost and P_TransportationMode(P_TruckType(tk)) in S_TMforTG(P_SKUTransportationGroup(SKU)) and P_RawTruckType(P_TruckType(tk)) = tktraw and P_SKUQuantity(pl, DC, w, P_RawTruckType(P_TruckType(tk)), tk, SKU) > 0);
+                Range: S_Unit;
+            }
+            StringParameter P_DescriptionOfSKUQuantity {
+                IndexDomain: (pl,DC,w,tktraw,tk,SKU) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_SKUProducingPlant(SKU) = pl and P_IsDCServingSKU(DC, SKU) = 1 and P_IsSKUExcluded(SKU) = 0 and P_TruckTransporationCost(pl, DC, P_TruckType(tk)) < P_BigTransportationCost and P_TransportationMode(P_TruckType(tk)) in S_TMforTG(P_SKUTransportationGroup(SKU)) and P_RawTruckType(P_TruckType(tk)) = tktraw and P_SKUQuantity(pl, DC, w, P_RawTruckType(P_TruckType(tk)), tk, SKU) > 0);
+            }
+            ElementParameter P_UnitOfUnsatisfiedReplenishment {
+                IndexDomain: (DC,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsDCServingSKU(DC, SKU) = 1 and P_IsSKUExcluded(SKU) = 0);
+                Range: S_Unit;
+            }
+            StringParameter P_DescriptionOfUnsatisfiedReplenishment {
+                IndexDomain: (DC,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsDCServingSKU(DC, SKU) = 1 and P_IsSKUExcluded(SKU) = 0);
+            }
+        }
+        DeclarationSection TruckAllocationDecisionVariables {
+            Variable V_Allocate {
+                IndexDomain: (tk,pl,DC,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_TruckTransporationCost(pl, DC, P_TruckType(tk)) < P_BigTransportationCost);
+                Range: binary;
+            }
+            Variable V_TGQuantity {
+                IndexDomain: (tk,pl,DC,w,tg) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_TransportationMode(P_TruckType(tk)) in S_TMforTG(tg) and P_TruckTransporationCost(pl, DC, P_TruckType(tk)) < P_BigTransportationCost);
+                Range: integer;
+            }
+            Variable V_SKUQuantity {
+                IndexDomain: (tk,pl,DC,w,SKU) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_SKUProducingPlant(SKU) = pl and P_IsDCServingSKU(DC, SKU) = 1 and P_IsSKUExcluded(SKU) = 0 and P_TruckTransporationCost(pl, DC, P_TruckType(tk)) < P_BigTransportationCost and P_TransportationMode(P_TruckType(tk)) in S_TMforTG(P_SKUTransportationGroup(SKU)));
+                Range: integer;
+            }
+            Variable V_UnSatisfiedReplenishement {
+                IndexDomain: (DC, SKU, w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0 and P_IsDCServingSKU(DC, SKU) = 1);
+                Range: integer;
+            }
+        }
+        DeclarationSection TruckAllocationConstraints {
+            Constraint C_TruckCapacity {
+                IndexDomain: (tk,pl,DC,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_TruckTransporationCost(pl, DC, P_TruckType(tk)) < P_BigTransportationCost);
+                Definition: sum(tg, V_TGQuantity(tk, pl, DC, w, tg)) <= P_TruckCapacity(P_TruckType(tk));
+            }
+            Constraint C_MeetReplenishment {
+                IndexDomain: (DC, SKU, w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_IsSKUExcluded(SKU) = 0 and P_IsDCServingSKU(DC, SKU) = 1);
+                Definition: sum((tk, pl), V_SKUQuantity(tk, pl, DC, w, SKU)) + V_UnSatisfiedReplenishement(DC, SKU, w) = P_Replenishment(DC, SKU, w);
+            }
+            Constraint C_TAVariableLinkage1 {
+                IndexDomain: (tk,pl,DC,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_TruckTransporationCost(pl, DC, P_TruckType(tk)) < P_BigTransportationCost);
+                Definition: sum(tg, V_TGQuantity(tk, pl, DC, w, tg)) <= P_BIgM3 * V_Allocate(tk, pl, DC, w);
+            }
+            Constraint C_TAVariableLinkage2 {
+                IndexDomain: (tk,pl,DC,w,tg) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_TransportationMode(P_TruckType(tk)) in S_TMforTG(tg) and P_TruckTransporationCost(pl, DC, P_TruckType(tk)) < P_BigTransportationCost);
+                Definition: {
+                    sum(SKU | P_SKUTransportationGroup(SKU) = tg, V_SKUQuantity(tk, pl, DC, w, SKU))
+                    = V_TGQuantity(tk, pl, DC, w, tg)
+                }
+            }
+            Constraint C_SamePlantTruckWeekDifferentDC {
+                IndexDomain: (tk,pl,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek);
+                Definition: sum(DC, V_Allocate(tk,pl,DC,w)) <= 1;
+            }
+            Constraint C_SameTruckDCWeekDifferentPlant {
+                IndexDomain: (tk,DC,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek);
+                Definition: sum(pl, V_Allocate(tk,pl,DC,w)) <= 1;
+            }
+            Constraint C_V_TotalTransportationCost {
+                Definition: V_TotalTransportationCost = sum((pl, DC, w, tk), P_TruckTransporationCost(pl, DC, P_TruckType(tk)) * V_Allocate(tk, pl, DC, w));
+            }
+            Constraint C_V_UnSatisfiedReplenishementPenalty {
+                Definition: V_UnSatisfiedReplenishementPenalty = sum((DC, SKU, w), V_UnSatisfiedReplenishement(DC, SKU, w));
+            }
+            Constraint C_V_TruckAllocationObj {
+                Definition: V_TruckAllocationObj = V_TotalTransportationCost + 1000000 * V_UnSatisfiedReplenishementPenalty;
+            }
+        }
+        DeclarationSection TruckAllocationObjective {
+            Variable V_TotalTransportationCost {
+                Range: free;
+            }
+            Variable V_UnSatisfiedReplenishementPenalty {
+                Range: free;
+            }
+            Variable V_TruckAllocationObj {
+                Range: free;
+            }
+        }
+        DeclarationSection TruckAllocationMathModel {
+            Set S_TruckAllocationVariables {
+                SubsetOf: AllVariables;
+                Definition: {
+                    data {
+                    V_Allocate
+                    ,V_TGQuantity
+                    ,V_SKUQuantity
+                    ,V_UnSatisfiedReplenishement
+                    ,V_TotalTransportationCost
+                    ,V_UnSatisfiedReplenishementPenalty
+                    ,V_TruckAllocationObj
+                    }
+                }
+            }
+            Set S_TruckAllocationConstraints {
+                SubsetOf: AllConstraints;
+                Definition: {
+                    data {
+                    C_TruckCapacity
+                    ,C_MeetReplenishment
+                    ,C_TAVariableLinkage1
+                    ,C_TAVariableLinkage2
+                    ,C_SamePlantTruckWeekDifferentDC
+                    ,C_SameTruckDCWeekDifferentPlant
+                    ,C_V_TotalTransportationCost
+                    ,C_V_UnSatisfiedReplenishementPenalty
+                    ,C_V_TruckAllocationObj
+                    }
+                }
+            }
+            MathematicalProgram M_TruckAllocationModel {
+                Objective: V_TruckAllocationObj;
+                Direction: minimize;
+                Constraints: S_TruckAllocationConstraints;
+                Variables: S_TruckAllocationVariables;
+                Type: MIP;
+            }
+        }
+        DeclarationSection TruckAllocationResult {
+            Parameter P_Allocate {
+                IndexDomain: (pl,DC,w,tktraw) | w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek;
+            }
+            Parameter P_TGQuantity {
+                IndexDomain: (pl,DC,w,tktraw,tk,tg) | w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek;
+            }
+            Parameter P_SKUQuantity {
+                IndexDomain: (pl,DC,w,tktraw,tk,SKU) | w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek;
+            }
+        }
+    }
+    Section RunSection {
+        Procedure ReadExcel {
+            Body: {
+                GetTime;
+                
+                ReadExcelData;
+                
+                !empty P_PlanningHorizonStart, P_PlanningHorizonEnd;
+            }
+        }
+        Procedure AfterSettingBothPlanningDates {
+            Body: {
+                if (P_PlanningHorizonStart <= P_PlanningHorizonEnd) then
+                	empty P_PlanningHorizonStartWeek, P_PlanningHorizonEndWeek;
+                
+                	P_PlanningHorizonStartWeek := P_DayToWeek(P_PlanningHorizonStart);
+                	P_PlanningHorizonEndWeek := P_DayToWeek(P_PlanningHorizonEnd);
+                
+                	InitializePlanningWeeks;
+                
+                	P_UserFixedSTORawUnit(DC, SKU, planw) := 'PCS';
+                endif;
+            }
+        }
+        Procedure InitializePlanningWeeks {
+            Body: {
+                !for(w|StringToTimeSlot("%m/%d/%c%y",Cal_Days, MomentToString("%m/%d/%c%y",[day],P_CalendarStartDate,w-first(Cal_Weeks)))>= P_PlanningHorizonStart
+                !
+                !
+                !
+                !
+                !for(w) do
+                !   if()
+                !endfor;
+                empty S_PlanningWeeks;
+                for(pdays) do
+                	S_PlanningWeeks := S_PlanningWeeks + P_DayToWeek(pdays);
+                endfor;
+            }
+        }
+        Procedure SetDataProcessData {
+            Body: {
+                !empty P_PlanningHorizonStart, P_PlanningHorizonEnd, P_IsAccountClosingDate, P_EarliestMonthToConsider;
+                
+                !P_PlanningHorizonStart := '10/1/2017';
+                !P_PlanningHorizonEnd := '10/31/2017';
+                !
+                !P_IsAccountClosingDate('10/5/2017') := 1;
+                !P_IsAccountClosingDate('10/6/2017') := 1;
+                !
+                !P_EarliestMonthToConsider := '1/2016';
+                
+                empty P_DefaultUnit, P_IsSKUExcluded, P_AdditionalDaysToForcast;
+                empty P_UserFixedSTO;
+                
+                P_DefaultUnit := 'PCS';
+                
+                P_IsSKUExcluded(SKU) := 0;
+                P_IsSKUExcluded('320691') := 1;
+                P_IsSKUExcluded('320693') := 1;
+                
+                P_AdditionalDaysToForcast := 60;
+                
+                for ((DC, SKU, planw) | (P_UserFixedSTORawQuantity(DC, SKU, planw) > 0 and P_IsSKUExcluded(SKU) = 0 and P_IsDCServingSKU(DC, SKU) = 1)) do
+                	if(P_UserFixedSTORawUnit(DC, SKU, planw) = P_DefaultUnit) then
+                		P_UserFixedSTO(DC, SKU, planw) := P_UserFixedSTORawQuantity(DC, SKU, planw);
+                	elseif (P_UnitCoversionRate(SKU, P_DefaultUnit, P_UserFixedSTORawUnit(DC, SKU, planw)) > 0) then
+                		P_UserFixedSTO(DC, SKU, planw) := P_UserFixedSTORawQuantity(DC, SKU, planw)
+                					  	  * P_UnitCoversionRate(SKU, P_DefaultUnit, P_UserFixedSTORawUnit(DC, SKU, planw));
+                	endif;
+                endfor;
+                
+                ProcessRawData;
+            }
+        }
+        Procedure RunPull {
+            Body: {
+                
+                if(pro::DelegateToServer()) then
+                                   return 1;
+                endif;
+                
+                CalculatePull;
+                !CalculatePull_Backup;
+                
+                empty P_Demand;
+                
+                if (P_UseMOMResult = 1) then
+                	P_Demand(DC, SKU, day) := P_MOMResult(DC, day, SKU);
+                else 
+                	P_Demand(DC, SKU, day) := P_YOYResult(DC, day, SKU);
+                endif;
+                
+                P_Demand(DC, SKU, day) := ceil(P_Demand(DC, SKU, day));
+                
+                PopulateDailyInventoryReport;
+            }
+        }
+        Procedure PopulateDailyInventoryReport {
+            Body: {
+                !!! Populate Daily Inventory Report
+                
+                !empty P_DisplayDescription, P_DisplaySalesOrderSAP, P_DisplayDeliverQty, P_DisplayUnDeliveredQty;
+                empty P_DisplayDescriptionNew, P_DisplaySalesOrderSAPNew, P_DisplayDeliverQtyNew, P_DisplayUnDeliveredQtyNew;
+                empty P_DisplayTMLandingLag, P_DisplayToOrder, P_DisplayLag3FCSTMPlus1;
+                empty P_ToBeSold;
+                empty P_DisplayCoverageDaysUnres, P_DisplayCoverageDaysAll;
+                empty P_DisplayAlert1, P_DisplayColor1, P_DisplayAlert2, P_DisplayColor2;
+                
+                P_DisplayDescriptionNew(dcd, SKU) := P_SKUDescription(SKU);
+                
+                for(dcd, SKU) do
+                	for (cmso) do
+                		if(P_DCDivisionOfCMSO(cmso) = dcd and P_SKUOfCMSO(cmso) = SKU) then
+                			P_DisplaySalesOrderSAPNew(dcd, SKU) := P_DisplaySalesOrderSAPNew(dcd, SKU) + P_QuantitOfCMSO(cmso);
+                		endif;
+                	endfor;
+                
+                	for (cmd) do
+                		if(P_DCDivisionOfCMD(cmd) = dcd and P_SKUOfCMD(cmd) = SKU) then
+                			P_DisplayDeliverQtyNew(dcd, SKU) := P_DisplayDeliverQtyNew(dcd, SKU) + P_QuantitOfCMD(cmd);
+                		endif;	
+                	endfor;
+                
+                	P_DisplayUnDeliveredQtyNew(dcd, SKU) := P_DisplaySalesOrderSAPNew(dcd, SKU) - P_DisplayDeliverQtyNew(dcd, SKU);
+                
+                !	if (P_UseMOMResult = 1) then
+                !		P_DisplayTMLandingLag(dcd, SKU) := P_MOMResult(P_DCofDCDivision(dcd), P_CurrentDate, SKU);
+                !	else 
+                !		P_DisplayTMLandingLag(dcd, SKU) := P_YOYResult(P_DCofDCDivision(dcd), P_CurrentDate, SKU);
+                !	endif;
+                
+                	for (re | P_DCServingRegionSKU(re, SKU) = P_DCofDCDivision(dcd) and P_TMRegion(re, SKU, P_DayToMonth(P_CurrentDate)) > 0) do
+                		P_DisplayTMLandingLag(dcd, SKU) := P_DisplayTMLandingLag(dcd, SKU) + P_TMRegion(re, SKU, P_DayToMonth(P_CurrentDate));
+                	endfor;
+                	if (P_DisplayTMLandingLag(dcd, SKU) = 0) then
+                		if (P_UseMOMResult = 1) then
+                			P_DisplayTMLandingLag(dcd, SKU) := sum(day | P_DayToMonth(day) = P_DayToMonth(P_CurrentDate),
+                								     P_MOMResult(P_DCofDCDivision(dcd), day, SKU));
+                		else 
+                			P_DisplayTMLandingLag(dcd, SKU) := sum(day | P_DayToMonth(day) = P_DayToMonth(P_CurrentDate),
+                								     P_YOYResult(P_DCofDCDivision(dcd), day, SKU));
+                		endif;
+                	endif;
+                
+                	P_DisplayToOrder(dcd, SKU) := P_DisplayTMLandingLag(dcd, SKU) - P_DisplaySalesOrderSAPNew(dcd, SKU);
+                
+                	if (P_DisplayToOrder(dcd, SKU) < 0) then
+                		P_OverSold(dcd, SKU) := 'Oversold';
+                		P_Ishidden(dcd, SKU) := 1;
+                	endif;
+                
+                	if (P_UseMOMResult = 1) then
+                		P_DisplayLag3FCSTMPlus1(dcd, SKU) := sum(day | P_DayToMonth(day) = P_DayToMonth(P_CurrentDate) + 1,
+                							       P_MOMResult(P_DCofDCDivision(dcd), day, SKU));
+                	else 
+                		P_DisplayLag3FCSTMPlus1(dcd, SKU) := sum(day | P_DayToMonth(day) = P_DayToMonth(P_CurrentDate) + 1,
+                							       P_YOYResult(P_DCofDCDivision(dcd), day, SKU));
+                	endif;
+                
+                	P_ToBeSold(dcd, SKU) := P_DisplayTMLandingLag(dcd, SKU) - P_DisplayDeliverQtyNew(dcd, SKU);
+                endfor;
+                
+                empty P_DateTem, P_NumofDays, P_TemValue;
+                for ((dcd, SKU) | P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1) do
+                	if (P_AvailableStockNew(dcd, SKU) <= 0) then
+                		P_DisplayCoverageDaysUnres(dcd, SKU) := 0;
+                	else
+                		P_DateTem := P_CurrentDate;
+                		P_NumofDays := 0;
+                		P_TemValue := P_AvailableStockNew(dcd, SKU);
+                
+                		while (P_DateTem <= P_PlanningHorizonEnd + P_AdditionalDaysToForcast) do
+                			P_TemValue := P_TemValue - P_Demand(P_DCofDCDivision(dcd), SKU, P_DateTem);
+                			if (P_TemValue < 0) then
+                				P_DisplayCoverageDaysUnres(dcd, SKU) := P_NumofDays;
+                				break;
+                			endif;
+                			P_NumofDays := P_NumofDays + 1;
+                			P_DateTem := P_DateTem + 1;
+                		endwhile;
+                
+                		if (P_DateTem > P_PlanningHorizonEnd + P_AdditionalDaysToForcast) then
+                			P_DisplayCoverageDaysUnres(dcd, SKU) := P_NumofDays;
+                		endif;
+                	endif;
+                endfor;
+                
+                empty P_DateTem, P_NumofDays, P_TemValue;
+                for ((dcd, SKU) | P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1) do
+                	if (P_AvailableStockNew(dcd, SKU) + P_StockInSTONew(dcd, SKU) + P_StockInTransitNew(dcd, SKU) + P_StockPendingCheckingNew(dcd, SKU) <= 0) then
+                		P_DisplayCoverageDaysAll(dcd, SKU) := 0;
+                	else
+                		P_DateTem := P_CurrentDate;
+                		P_NumofDays := 0;
+                		P_TemValue := P_AvailableStockNew(dcd, SKU) 
+                			      + P_StockInSTONew(dcd, SKU) + P_StockInTransitNew(dcd, SKU) + P_StockPendingCheckingNew(dcd, SKU);
+                
+                		while (P_DateTem <= P_PlanningHorizonEnd + P_AdditionalDaysToForcast) do
+                			P_TemValue := P_TemValue - P_Demand(P_DCofDCDivision(dcd), SKU, P_DateTem);
+                			if (P_TemValue < 0) then
+                				P_DisplayCoverageDaysAll(dcd, SKU) := P_NumofDays;
+                				break;
+                			endif;
+                			P_NumofDays := P_NumofDays + 1;
+                			P_DateTem := P_DateTem + 1;
+                		endwhile;
+                
+                		if (P_DateTem > P_PlanningHorizonEnd + P_AdditionalDaysToForcast) then
+                			P_DisplayCoverageDaysAll(dcd, SKU) := P_NumofDays;
+                		endif;
+                	endif;
+                endfor;
+                
+                for ((dcd, SKU) | P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1) do
+                	if (P_AvailableStockNew(dcd, SKU) < P_DisplayUnDeliveredQtyNew(dcd, SKU)) then
+                		P_DisplayColor1(dcd, SKU) := 'Black';
+                	elseif(P_AvailableStockNew(dcd, SKU) >= P_DisplayUnDeliveredQtyNew(dcd, SKU)
+                		and P_AvailableStockNew(dcd, SKU) <= P_ToBeSold(dcd, SKU) * P_Percentage1) then
+                		P_DisplayColor1(dcd, SKU) := 'Red';
+                	elseif(P_AvailableStockNew(dcd, SKU) >= P_DisplayUnDeliveredQtyNew(dcd, SKU)
+                		and P_AvailableStockNew(dcd, SKU) > P_ToBeSold(dcd, SKU) * P_Percentage1
+                		and P_AvailableStockNew(dcd, SKU) <= P_ToBeSold(dcd, SKU) * P_Percentage2) then
+                		P_DisplayColor1(dcd, SKU) := 'Yellow';
+                	elseif(P_AvailableStockNew(dcd, SKU) >= P_DisplayUnDeliveredQtyNew(dcd, SKU)
+                		and P_AvailableStockNew(dcd, SKU) > P_ToBeSold(dcd, SKU) * P_Percentage2
+                		and P_AvailableStockNew(dcd, SKU) <= P_ToBeSold(dcd, SKU) * P_Percentage3) then
+                		P_DisplayColor1(dcd, SKU) := 'Green';
+                	elseif(P_AvailableStockNew(dcd, SKU) >= P_DisplayUnDeliveredQtyNew(dcd, SKU)
+                		and P_AvailableStockNew(dcd, SKU) > P_ToBeSold(dcd, SKU) * P_Percentage3) then
+                		P_DisplayColor1(dcd, SKU) := 'Magenta';
+                	endif;
+                endfor;
+                
+                for ((dcd, SKU) | P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1) do
+                	if (P_DisplayCoverageDaysUnres(dcd, SKU) <= 3) then
+                		P_DisplayColor2(dcd, SKU) := 'Red';
+                	elseif (P_DisplayCoverageDaysUnres(dcd, SKU) > 3 and P_DisplayCoverageDaysUnres(dcd, SKU) <= 10) then
+                		P_DisplayColor2(dcd, SKU) := 'Yellow';
+                	elseif (P_DisplayCoverageDaysUnres(dcd, SKU) > 10 and P_DisplayCoverageDaysUnres(dcd, SKU) <= 21) then
+                		P_DisplayColor2(dcd, SKU) := 'Green';
+                	else
+                		P_DisplayColor2(dcd, SKU) := 'Magenta';
+                	endif;
+                endfor;
+                
+                
+                
+                !empty P_PlantSTO;
+                empty P_PlantSTONew, P_DisplayPlantSKUDescription;
+                for(dcd, SKU) do
+                	P_PlantSTONew(P_SKUProducingPlant(SKU), SKU) := 
+                	P_PlantSTONew(P_SKUProducingPlant(SKU), SKU) + P_StockInSTONew(dcd, SKU);
+                endfor;
+                P_PlantSTONew(pl, SKU) := -P_PlantSTONew(pl, SKU);
+                
+                P_DisplayPlantSKUDescription(pl, SKU) := P_SKUDescription(SKU);
+            }
+        }
+        Procedure RunPush {
+            Body: {
+                
+                if(pro::DelegateToServer()) then
+                                   return 1;
+                endif;
+                
+                CalculatePush;
+            }
+        }
+        Procedure RunStockAllocationOptimization {
+            Body: {
+                
+                if(pro::DelegateToServer()) then
+                                   return 1;
+                endif;
+                
+                empty P_SacrificePercentage, P_DcSKUPriority2, P_BIgM, P_BIgM2;
+                
+                P_SacrificePercentage := 0.8;
+                P_DcSKUPriority2(DC, SKU) := 1.2 * P_DcSKUPriority1(DC, SKU);
+                P_BIgM := 1000000;
+                P_BIgM2 := 10000;
+                
+                
+                SolveStockAllocationModel;
+                
+                empty P_SAODisplayDescription1, P_SAODisplayDescription2;
+                for (DC, SKU, w | V_Replenishment(DC, SKU, w) > 0) do 
+                	P_SAODisplayDescription1(DC, SKU, w) := P_SKUDescription(SKU);
+                endfor;
+                
+                for (DC, SKU, w | V_Shortage1(DC, SKU, w) > 0 or V_ExcessDcMaximumStockCoverageDays(DC, SKU, w) > 0) do 
+                	P_SAODisplayDescription2(DC, SKU, w) := P_SKUDescription(SKU);
+                endfor;
+            }
+        }
+        Procedure SolveStockAllocationModel {
+            Body: {
+                
+                
+                solve M_StockAllocationModel;
+            }
+        }
+        Procedure RunTruckAllocationOptimization {
+            Body: {
+                if(pro::DelegateToServer()) then
+                                   return 1;
+                endif;
+                
+                
+                empty P_ReplenishmentUnit, P_Replenishment;
+                empty P_UnitOfTransportationMode, P_UnitOfTransportationGroup;
+                empty P_TruckNumber, P_NumberOfTrucksForEachType, P_RunningIndex, P_TotalNumberOfTrucks, S_Truck, P_TruckType;
+                empty P_BigM3;
+                
+                !P_ReplenishmentUnit(DC, SKU, w) := 'SHIPPER';
+                !P_Replenishment(DC, SKU, w) := ceil(V_Replenishment(DC, SKU, w) / P_UnitCoversionRate(SKU, P_DefaultUnit, P_ReplenishmentUnit(DC, SKU, w)));
+                
+                P_UnitOfTransportationMode(P_TransportationMode(tkt)) := P_TruckCapacityUnit(tkt);
+                
+                for ((tg, tm) | tm in S_TMforTG(tg)) do
+                	P_UnitOfTransportationGroup(tg) := P_UnitOfTransportationMode(tm);
+                endfor;
+                
+                P_Replenishment(DC, SKU, w) := ceil(V_Replenishment(DC, SKU, w) / 
+                				    P_UnitCoversionRate(SKU, P_DefaultUnit, P_UnitOfTransportationGroup(P_SKUTransportationGroup(SKU))));
+                
+                P_TruckNumber := 0;
+                P_NumberOfTrucksForEachType := 30;
+                P_RunningIndex := 1;
+                
+                for(tkt) do	
+                	P_TotalNumberOfTrucks := P_NumberOfTrucksForEachType * P_RunningIndex;
+                
+                	while (P_TruckNumber < P_TotalNumberOfTrucks) do
+                		P_TruckNumber := P_TruckNumber + 1;
+                		S_Truck := S_Truck + P_TruckNumber;
+                		P_TruckType(P_TruckNumber) := tkt;
+                	endwhile;
+                
+                	P_RunningIndex := P_RunningIndex + 1;
+                endfor;
+                
+                P_BigM3 := 1000000;
+                
+                SolveTruckAllocationModel;
+                
+                DisplayTruckAllocationResult;
+            }
+        }
+        Procedure SolveTruckAllocationModel {
+            Body: {
+                
+                
+                solve M_TruckAllocationModel;
+            }
+        }
+        Procedure DisplayTruckAllocationResult {
+            Body: {
+                empty P_Allocate, P_TGQuantity, P_SKUQuantity, P_UnitOfTGQuantity;
+                empty P_UnitOfSKUQuantity, P_DescriptionOfSKUQuantity, P_UnitOfUnsatisfiedReplenishment, P_DescriptionOfUnsatisfiedReplenishment;
+                
+                for (tk, pl, DC, w | w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek
+                		     and P_TruckTransporationCost(pl, DC, P_TruckType(tk)) < P_BigTransportationCost) do
+                	P_Allocate(pl, DC, w, P_RawTruckType(P_TruckType(tk))) := P_Allocate(pl, DC, w, P_RawTruckType(P_TruckType(tk))) + V_Allocate(tk, pl, DC, w);
+                endfor;
+                
+                P_TGQuantity(pl, DC, w, P_RawTruckType(P_TruckType(tk)), tk, tg) := V_TGQuantity(tk, pl, DC, w, tg);
+                
+                P_SKUQuantity(pl, DC, w, P_RawTruckType(P_TruckType(tk)), tk, SKU) := V_SKUQuantity(tk, pl, DC, w, SKU);
+                
+                !for ((pl,DC,w,tk,tg) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek 
+                !			and P_TransportationMode(P_TruckType(tk)) in S_TMforTG(tg) 
+                !			and P_TruckTransporationCost(pl, DC, P_TruckType(tk)) < P_BigTransportationCost
+                !			and P_TGQuantity(pl, DC, w, P_RawTruckType(P_TruckType(tk)), tk, tg) > 0)) do
+                
+                for (pl,DC,w,tk,tg | w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek
+                		     and P_TruckTransporationCost(pl, DC, P_TruckType(tk)) < P_BigTransportationCost
+                                     and P_TGQuantity(pl, DC, w, P_RawTruckType(P_TruckType(tk)), tk, tg) > 0) do
+                	P_UnitOfTGQuantity(pl, DC, w, P_RawTruckType(P_TruckType(tk)), tk, tg) := P_UnitOfTransportationGroup(tg);		
+                endfor;
+                
+                !for ((pl,DC,w,tk,SKU) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_SKUProducingPlant(SKU) = pl
+                !			 and P_IsDCServingSKU(DC, SKU) = 1 and P_IsSKUExcluded(SKU) = 0
+                !			 and P_TruckTransporationCost(pl, DC, P_TruckType(tk)) < P_BigTransportationCost
+                !			 and P_TransportationMode(P_TruckType(tk)) in S_TMforTG(P_SKUTransportationGroup(SKU))
+                !			 and P_SKUQuantity(pl, DC, w, P_RawTruckType(P_TruckType(tk)), tk, SKU) > 0)) do
+                for (pl,DC,w,tk,SKU | w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek
+                		      and P_TruckTransporationCost(pl, DC, P_TruckType(tk)) < P_BigTransportationCost
+                		      and P_IsDCServingSKU(DC, SKU) = 1 and P_IsSKUExcluded(SKU) = 0
+                                      and P_SKUQuantity(pl, DC, w, P_RawTruckType(P_TruckType(tk)), tk, SKU) > 0) do
+                	P_UnitOfSKUQuantity(pl, DC, w, P_RawTruckType(P_TruckType(tk)), tk, SKU) := P_UnitOfTransportationGroup(P_SKUTransportationGroup(SKU));
+                
+                	P_DescriptionOfSKUQuantity(pl, DC, w, P_RawTruckType(P_TruckType(tk)), tk, SKU) := P_SKUDescription(SKU);
+                endfor;
+                
+                !for ((DC, SKU, w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek
+                !		     and P_IsSKUExcluded(SKU) = 0 and P_IsDCServingSKU(DC, SKU) = 1
+                !		     and V_UnSatisfiedReplenishement(DC, SKU, w) > 0)) do
+                for (DC, SKU, w | w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and V_UnSatisfiedReplenishement(DC, SKU, w) > 0) do
+                	P_UnitOfUnsatisfiedReplenishment(DC, SKU, w) := P_UnitOfTransportationGroup(P_SKUTransportationGroup(SKU));
+                
+                	P_DescriptionOfUnsatisfiedReplenishment(DC, SKU, w) := P_SKUDescription(SKU);
+                endfor;
+            }
+        }
+        Procedure RunAll {
+            Body: {
+                !ReadExcel;
+                
+                if(pro::DelegateToServer()) then
+                                   return 1;
+                endif;
+                
+                SetDataProcessData;
+                
+                RunPull;
+                
+                RunPush;
+                
+                RunStockAllocationOptimization;
+                
+                RunTruckAllocationOptimization;
+            }
+        }
+    }
+    Section UISection {
+        Section UI_Color_Setting {
+            DeclarationSection UI_Color_Declaration {
+                ElementParameter P_Color_InputData {
+                    Range: AllColors;
+                    InitialData: 'Black';
+                }
+                ElementParameter P_Color_ParameterSetting {
+                    Range: AllColors;
+                    InitialData: 'Black';
+                }
+                ElementParameter P_Color_DerivedData {
+                    Range: AllColors;
+                    InitialData: 'Black';
+                }
+                ElementParameter P_Color_ResultDashboard {
+                    Range: AllColors;
+                    InitialData: 'Black';
+                }
+                ElementParameter P_Color_Report {
+                    Range: AllColors;
+                    InitialData: 'Black';
+                }
+            }
+            Procedure Click_InputData {
+                Body: {
+                    P_Color_InputData := 'Blue';
+                    
+                    P_Color_ParameterSetting := 'Black';
+                    P_Color_DerivedData := 'Black';
+                    P_Color_ResultDashboard := 'Black';
+                    P_Color_Report := 'Black';
+                }
+            }
+            Procedure Click_ParameterSetting {
+                Body: {
+                    P_Color_ParameterSetting := 'Blue';
+                    
+                    P_Color_InputData := 'Black';
+                    P_Color_DerivedData := 'Black';
+                    P_Color_ResultDashboard := 'Black';
+                    P_Color_Report := 'Black';
+                }
+            }
+            Procedure Click_DerivedData {
+                Body: {
+                    P_Color_DerivedData := 'Blue';
+                    
+                    P_Color_InputData := 'Black';
+                    P_Color_ParameterSetting := 'Black';
+                    P_Color_ResultDashboard := 'Black';
+                    P_Color_Report := 'Black';
+                }
+            }
+            Procedure Click_ResultDashboard {
+                Body: {
+                    P_Color_ResultDashboard := 'Blue';
+                    
+                    P_Color_InputData := 'Black';
+                    P_Color_ParameterSetting := 'Black';
+                    P_Color_DerivedData := 'Black';
+                    P_Color_Report := 'Black';
+                }
+            }
+            Procedure Click_Report {
+                Body: {
+                    P_Color_Report := 'Blue';
+                    
+                    P_Color_InputData := 'Black';
+                    P_Color_ParameterSetting := 'Black';
+                    P_Color_DerivedData := 'Black';
+                    P_Color_ResultDashboard := 'Black';
+                }
+            }
+        }
+        Section DisplayData {
+            Section PullDisplayData {
+                DeclarationSection PullDisplayDataDeclaration {
+                    ElementParameter P_PullSelectedSKUCategory {
+                        Range: S_SKUCategory;
+                    }
+                    Parameter P_PullDisplayMOMResult {
+                        IndexDomain: (DC, day, SKU);
+                    }
+                    Parameter P_PullDisplayYOYResult {
+                        IndexDomain: (DC, day, SKU);
+                    }
+                    StringParameter P_PullDisplaySKUDescription1 {
+                        IndexDomain: (DC, day, SKU);
+                    }
+                    StringParameter P_PullDisplaySKUDescription2 {
+                        IndexDomain: (DC, day, SKU);
+                    }
+                }
+                Procedure PullDisplay {
+                    Body: {
+                        empty P_PullDisplayMOMResult, P_PullDisplayYOYResult, P_PullDisplaySKUDescription1, P_PullDisplaySKUDescription2;
+                        
+                        for (SKU | P_SKUCategoryOfSKU(SKU) = P_PullSelectedSKUCategory) do
+                        	P_PullDisplayMOMResult(DC, day, SKU) := P_MOMResult(DC, day, SKU);
+                        	P_PullDisplayYOYResult(DC, day, SKU) := P_YOYResult(DC, day, SKU);
+                        
+                        	for (DC, day) do
+                        		if (P_PullDisplayMOMResult(DC, day, SKU) > 0) then
+                        			P_PullDisplaySKUDescription1(DC, day, SKU) := P_SKUDescription(SKU);
+                        		endif;
+                        
+                        		if (P_PullDisplayYOYResult(DC, day, SKU) > 0) then
+                        			P_PullDisplaySKUDescription2(DC, day, SKU) := P_SKUDescription(SKU);
+                        		endif;
+                        	endfor;
+                        endfor;
+                    }
+                }
+            }
+            Section FinalDisplayData {
+                DeclarationSection Common {
+                    ElementParameter P_FinalResultSelectedSKUCategory {
+                        Range: S_SKUCategory;
+                    }
+                }
+                DeclarationSection InventoryLevelDashboard {
+                    StringParameter P_DisplaySKUDescription {
+                        IndexDomain: (dcd,SKU) | P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1;
+                    }
+                    Parameter P_DisplayAvailableStock {
+                        IndexDomain: (dcd,SKU) | P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1;
+                    }
+                    Parameter P_DisplayQtypending {
+                        IndexDomain: (dcd,SKU) | P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1;
+                    }
+                    Parameter P_DisplayAvailableStockDays {
+                        IndexDomain: (dcd,SKU) | P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1;
+                    }
+                    ElementParameter P_DateTem {
+                        Range: Cal_Days;
+                    }
+                    Parameter P_NumofDays;
+                    Parameter P_TemValue;
+                    Parameter P_DisplayTotalStockDays {
+                        IndexDomain: (dcd,SKU) | P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1;
+                    }
+                    Parameter P_DisplayMin {
+                        IndexDomain: (dcd,SKU) | P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1;
+                    }
+                    Parameter P_DisplayMax {
+                        IndexDomain: (dcd,SKU) | P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1;
+                    }
+                    Parameter P_DisplayColor {
+                        IndexDomain: (dcd,SKU);
+                    }
+                    ElementParameter P_Color {
+                        IndexDomain: (dcd,SKU);
+                        Range: AllColors;
+                    }
+                }
+                DeclarationSection ReplenishmentDashboard {
+                    StringParameter P_DisplaySKUDescription2 {
+                        IndexDomain: (dcd,pl,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_SKUProducingPlant(SKU) = pl and P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1 and P_IsSKUExcluded(SKU) = 0 and P_DCDivision(P_DCofDCDivision(dcd), pl) = dcd);
+                    }
+                    Parameter P_DisplayReplenishment {
+                        IndexDomain: (dcd,pl,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_SKUProducingPlant(SKU) = pl and P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1 and P_IsSKUExcluded(SKU) = 0 and P_DCDivision(P_DCofDCDivision(dcd), pl) = dcd);
+                    }
+                    Parameter P_DisplayDaysofSupply {
+                        IndexDomain: (dcd,pl,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_SKUProducingPlant(SKU) = pl and P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1 and P_IsSKUExcluded(SKU) = 0 and P_DCDivision(P_DCofDCDivision(dcd), pl) = dcd);
+                    }
+                    Parameter P_DisplayCoveredDaysAfter {
+                        IndexDomain: (dcd,pl,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_SKUProducingPlant(SKU) = pl and P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1 and P_IsSKUExcluded(SKU) = 0 and P_DCDivision(P_DCofDCDivision(dcd), pl) = dcd);
+                    }
+                    Parameter P_DisplayFrequencyInResult {
+                        IndexDomain: (dcd,pl,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_SKUProducingPlant(SKU) = pl and P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1 and P_IsSKUExcluded(SKU) = 0 and P_DCDivision(P_DCofDCDivision(dcd), pl) = dcd);
+                    }
+                    StringParameter P_DisplaySKUandDescription {
+                        IndexDomain: SKU;
+                        Definition: SKU+" ("+P_SKUDescription(SKU)+")";
+                    }
+                    ElementParameter P_DisplayWeekStartDate {
+                        IndexDomain: (dcd,pl,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_SKUProducingPlant(SKU) = pl and P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1 and P_IsSKUExcluded(SKU) = 0 and P_DCDivision(P_DCofDCDivision(dcd), pl) = dcd);
+                        Range: Cal_Days;
+                    }
+                    ElementParameter P_DisplayWeekEndDate {
+                        IndexDomain: (dcd,pl,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_SKUProducingPlant(SKU) = pl and P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1 and P_IsSKUExcluded(SKU) = 0 and P_DCDivision(P_DCofDCDivision(dcd), pl) = dcd);
+                        Range: Cal_Days;
+                    }
+                    ElementParameter P_WeekStartDate {
+                        IndexDomain: w | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek);
+                        Range: Cal_Days;
+                    }
+                    ElementParameter P_WeekEndDate {
+                        IndexDomain: w | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek);
+                        Range: Cal_Days;
+                    }
+                    StringParameter P_Dates {
+                        IndexDomain: (dcd,pl,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_SKUProducingPlant(SKU) = pl and P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1 and P_IsSKUExcluded(SKU) = 0 and P_DCDivision(P_DCofDCDivision(dcd), pl) = dcd);
+                        Definition: P_WeekStartDate(w)+"-"+P_WeekEndDate(w);
+                    }
+                    StringParameter P_DisplayDates {
+                        IndexDomain: (dcd,pl,SKU,w) | (w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek and P_SKUProducingPlant(SKU) = pl and P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1 and P_IsSKUExcluded(SKU) = 0 and P_DCDivision(P_DCofDCDivision(dcd), pl) = dcd);
+                    }
+                    Parameter P_DisplayTotalReplenishment {
+                        IndexDomain: (dcd,pl,SKU) | (P_SKUProducingPlant(SKU) = pl and P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1 and P_IsSKUExcluded(SKU) = 0 and P_DCDivision(P_DCofDCDivision(dcd), pl) = dcd);
+                    }
+                }
+                Procedure FinalResultDisplay {
+                    Body: {
+                        empty P_DisplaySKUDescription, P_DisplayAvailableStock, P_DisplayQtypending;
+                        empty P_DisplayAvailableStockDays, P_DateTem, P_NumofDays, P_TemValue;
+                        empty P_DisplayTotalStockDays, P_DisplayMin, P_DisplayMax, P_Color;
+                        
+                        for (SKU | P_SKUCategoryOfSKU(SKU) = P_FinalResultSelectedSKUCategory) do
+                        	P_DisplaySKUDescription(dcd, SKU) := P_SKUDescription(SKU);
+                        
+                        	P_DisplayAvailableStock(dcd, SKU) := 
+                        	P_DisplayAvailableStock(dcd, SKU) + P_AvailableStockNew(dcd, SKU) - P_CurrentMonthTobeDeliveredQuantityNew(dcd, SKU);
+                        
+                        	P_DisplayQtypending(dcd, SKU) :=
+                        	P_DisplayQtypending(dcd, SKU) + P_StockPendingCheckingNew(dcd, SKU) + P_StockInTransitNew(dcd, SKU) + P_StockInSTONew(dcd, SKU);
+                        endfor;
+                        
+                        for ((dcd, SKU) | P_DisplayAvailableStock(dcd, SKU) < 0) do
+                        	P_DisplayAvailableStock(dcd, SKU) := 0;
+                        endfor;
+                        
+                        for ((dcd, SKU) | P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1 and P_SKUCategoryOfSKU(SKU) = P_FinalResultSelectedSKUCategory) do
+                        	if (P_DisplayAvailableStock(dcd, SKU) <= 0) then
+                        		P_DisplayAvailableStockDays(dcd, SKU) := 0;
+                        	else
+                        		P_DateTem := P_PlanningHorizonStart;
+                        		P_NumofDays := 0;
+                        		P_TemValue := P_DisplayAvailableStock(dcd, SKU);
+                        
+                        		while (P_DateTem <= P_PlanningHorizonEnd + P_AdditionalDaysToForcast) do
+                        			P_TemValue := P_TemValue - P_Demand(P_DCofDCDivision(dcd), SKU, P_DateTem);
+                        			if (P_TemValue < 0) then
+                        				P_DisplayAvailableStockDays(dcd, SKU) := P_NumofDays;
+                        				break;
+                        			endif;
+                        			P_NumofDays := P_NumofDays + 1;
+                        			P_DateTem := P_DateTem + 1;
+                        		endwhile;
+                        
+                        		if (P_DateTem > P_PlanningHorizonEnd + P_AdditionalDaysToForcast) then
+                        			P_DisplayAvailableStockDays(dcd, SKU) := P_NumofDays;
+                        		endif;
+                        	endif;
+                        endfor;
+                        
+                        for ((dcd, SKU) | P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1 and P_SKUCategoryOfSKU(SKU) = P_FinalResultSelectedSKUCategory) do
+                        	if (P_DisplayAvailableStock(dcd, SKU) + P_DisplayQtypending(dcd, SKU) <= 0) then
+                        		P_DisplayTotalStockDays(dcd, SKU) := 0;
+                        	else
+                        		P_DateTem := P_PlanningHorizonStart;
+                        		P_NumofDays := 0;
+                        		P_TemValue := P_DisplayAvailableStock(dcd, SKU) + P_DisplayQtypending(dcd, SKU);
+                        
+                        		while (P_DateTem <= P_PlanningHorizonEnd + P_AdditionalDaysToForcast) do
+                        			P_TemValue := P_TemValue - P_Demand(P_DCofDCDivision(dcd), SKU, P_DateTem);
+                        			if (P_TemValue < 0) then
+                        				P_DisplayTotalStockDays(dcd, SKU) := P_NumofDays;
+                        				break;
+                        			endif;
+                        			P_NumofDays := P_NumofDays + 1;
+                        			P_DateTem := P_DateTem + 1;
+                        		endwhile;
+                        
+                        		if (P_DateTem > P_PlanningHorizonEnd + P_AdditionalDaysToForcast) then
+                        			P_DisplayTotalStockDays(dcd, SKU) := P_NumofDays;
+                        		endif;
+                        	endif;
+                        endfor;
+                        
+                        for ((dcd, SKU) | P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1 and P_SKUCategoryOfSKU(SKU) = P_FinalResultSelectedSKUCategory) do
+                        	for (day | day >= P_PlanningHorizonStart and day <= P_PlanningHorizonStart + P_DesiredCoverageDaysMin(P_DCofDCDivision(dcd), SKU)) do
+                        		P_DisplayMin(dcd, SKU) := P_DisplayMin(dcd, SKU) + P_Demand(P_DCofDCDivision(dcd), SKU, day);
+                        	endfor;
+                        
+                        	for (day | day >= P_PlanningHorizonStart and day <= P_PlanningHorizonStart + P_DesiredCoverageDaysMax(P_DCofDCDivision(dcd), SKU)) do
+                        		P_DisplayMax(dcd, SKU) := P_DisplayMax(dcd, SKU) + P_Demand(P_DCofDCDivision(dcd), SKU, day);
+                        	endfor;
+                        endfor;
+                        
+                        for ((dcd, SKU) | P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1 and P_SKUCategoryOfSKU(SKU) = P_FinalResultSelectedSKUCategory) do
+                        	if (P_DisplayAvailableStock(dcd, SKU) + P_DisplayQtypending(dcd, SKU) < P_DisplayMin(dcd, SKU)) then
+                        		P_Color(dcd, SKU) := 'Red';
+                        	elseif (P_DisplayAvailableStock(dcd, SKU) + P_DisplayQtypending(dcd, SKU) >= P_DisplayMin(dcd, SKU)
+                        		and P_DisplayAvailableStock(dcd, SKU) + P_DisplayQtypending(dcd, SKU) <= P_DisplayMax(dcd, SKU)) then
+                        		P_Color(dcd, SKU) := 'Yellow';
+                        	else
+                        		P_Color(dcd, SKU) := 'Green';
+                        	endif;
+                        endfor;
+                        
+                        
+                        
+                        !Replenishment Dashboard
+                        empty P_WeekStartDate, P_WeekEndDate;
+                        empty P_DateTem, P_NumofDays, P_TemValue;
+                        empty P_DisplayReplenishment, P_DisplayDaysofSupply, P_DisplayCoveredDaysAfter, P_DisplayFrequencyInResult;
+                        empty P_DisplayTotalReplenishment;
+                        !empty P_DisplayWeekStartDate, P_DisplayWeekEndDate;
+                        empty P_DisplaySKUDescription2, P_DisplayDates;
+                        
+                        for (w | w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek) do
+                        	P_WeekStartDate(w) := first (day | P_DayToWeek(day) = w);
+                        	P_WeekEndDate(w) := last (day | P_DayToWeek(day) = w);
+                        endfor;
+                        
+                        for ((dcd, pl, SKU, w) | (P_SKUCategoryOfSKU(SKU) = P_FinalResultSelectedSKUCategory 
+                        		       and w >= P_PlanningHorizonStartWeek and w <= P_PlanningHorizonEndWeek 
+                        		       and P_SKUProducingPlant(SKU) = pl and P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1 and P_IsSKUExcluded(SKU) = 0
+                        		       and P_DCDivision(P_DCofDCDivision(dcd), pl) = dcd)) do
+                        	P_DisplayReplenishment(dcd, pl, SKU, w) := V_Replenishment(P_DCofDCDivision(dcd), SKU, w);
+                        
+                        	P_DisplayTotalReplenishment(dcd, pl, SKU) := P_DisplayTotalReplenishment(dcd, pl, SKU) + P_DisplayReplenishment(dcd, pl, SKU, w);
+                        
+                        	if (dcd = 'CN0S' and pl = 'CN01' and SKU = '307793') then
+                        		P_NumofDays := 0;
+                        	endif;
+                        
+                        	if (P_DisplayReplenishment(dcd, pl, SKU, w) <= 0) then
+                        		P_DisplayDaysofSupply(dcd, pl, SKU, w) := 0;
+                        	else
+                        		!P_DateTem := P_PlanningHorizonStart;
+                        		P_DateTem := P_WeekEndDate(w);
+                        		P_NumofDays := 0;
+                        		P_TemValue := P_DisplayReplenishment(dcd, pl, SKU, w);
+                        
+                        		while (P_DateTem <= P_PlanningHorizonEnd + P_AdditionalDaysToForcast) do
+                        			P_TemValue := P_TemValue - P_Demand(P_DCofDCDivision(dcd), SKU, P_DateTem);
+                        			if (P_TemValue < 0) then
+                        				P_DisplayDaysofSupply(dcd, pl, SKU, w) := P_NumofDays;
+                        				break;
+                        			endif;
+                        			P_NumofDays := P_NumofDays + 1;
+                        			P_DateTem := P_DateTem + 1;
+                        		endwhile;
+                        
+                        		if (P_DateTem > P_PlanningHorizonEnd + P_AdditionalDaysToForcast) then
+                        			P_DisplayDaysofSupply(dcd, pl, SKU, w) := P_NumofDays;
+                        		endif;
+                        	endif;
+                        
+                        
+                        !	if (P_DisplayReplenishment(dcd, pl, SKU, w) + P_DisplayAvailableStock(dcd, SKU) + P_DisplayQtypending(dcd, SKU) <= 0) then
+                        !		P_DisplayCoveredDaysAfter(dcd, pl, SKU, w) := 0;
+                        !	else
+                        		!P_DateTem := P_PlanningHorizonStart;
+                        		P_DateTem := P_WeekEndDate(w);
+                        		P_NumofDays := 0;
+                        		!P_TemValue := P_DisplayReplenishment(dcd, pl, SKU, w) + P_DisplayAvailableStock(dcd, SKU) + P_DisplayQtypending(dcd, SKU);
+                        		P_TemValue := P_DisplayTotalReplenishment(dcd, pl, SKU) + P_DisplayAvailableStock(dcd, SKU) + P_DisplayQtypending(dcd, SKU);
+                        
+                        		for (day | day >= P_PlanningHorizonStart and day < P_DateTem) do
+                        			P_TemValue := P_TemValue - P_Demand(P_DCofDCDivision(dcd), SKU, day);
+                        		endfor;
+                        
+                        		while (P_DateTem <= P_PlanningHorizonEnd + P_AdditionalDaysToForcast) do
+                        			P_TemValue := P_TemValue - P_Demand(P_DCofDCDivision(dcd), SKU, P_DateTem);
+                        			if (P_TemValue < 0) then
+                        				P_DisplayCoveredDaysAfter(dcd, pl, SKU, w) := P_NumofDays;
+                        				break;
+                        			endif;
+                        			P_NumofDays := P_NumofDays + 1;
+                        			P_DateTem := P_DateTem + 1;
+                        		endwhile;
+                        
+                        		if (P_DateTem > P_PlanningHorizonEnd + P_AdditionalDaysToForcast) then
+                        			P_DisplayCoveredDaysAfter(dcd, pl, SKU, w) := P_NumofDays;
+                        		endif;
+                        !	endif;
+                        
+                        	if (P_DisplayReplenishment(dcd, pl, SKU, w) > 0) then
+                        		P_DisplayFrequencyInResult(dcd, pl, SKU, w) := 1;
+                        	endif;
+                        endfor;
+                        
+                        for (SKU | P_SKUCategoryOfSKU(SKU) = P_FinalResultSelectedSKUCategory and P_IsSKUExcluded(SKU) = 0) do
+                        	for (dcd, pl, w |P_DisplayCoveredDaysAfter(dcd, pl, SKU, w) > 0) do
+                        		P_DisplaySKUDescription2(dcd, pl, SKU, w) := P_SKUDescription(SKU);
+                        
+                        !		P_DisplayWeekStartDate(dcd, pl, SKU, w) := P_WeekStartDate(w);
+                        !		P_DisplayWeekEndDate(dcd, pl, SKU, w) := P_WeekEndtDate(w);
+                        
+                        !		P_WeekStartDate(w) := first (day | P_DayToWeek(day) = w);
+                        !		P_WeekEndtDate(w) := last (day | P_DayToWeek(day) = w);
+                        
+                        		P_DisplayDates(dcd, pl, SKU, w) := P_Dates(dcd, pl, SKU, w);
+                        	endfor;
+                        endfor;
+                    }
+                }
+            }
+            Section ReportDisplayData {
+                DeclarationSection DailyInventoryReport {
+                    StringParameter P_DisplayDescription {
+                        IndexDomain: (dcd, rsku);
+                    }
+                    StringParameter P_DisplayDescriptionNew {
+                        IndexDomain: (dcd,SKU);
+                    }
+                    Parameter P_DisplaySalesOrderSAP {
+                        IndexDomain: (dcd,rsku);
+                    }
+                    Parameter P_DisplaySalesOrderSAPNew {
+                        IndexDomain: (dcd,SKU);
+                    }
+                    Parameter P_DisplayDeliverQty {
+                        IndexDomain: (dcd,rsku);
+                    }
+                    Parameter P_DisplayDeliverQtyNew {
+                        IndexDomain: (dcd,SKU);
+                    }
+                    Parameter P_DisplayUnDeliveredQty {
+                        IndexDomain: (dcd,rsku);
+                    }
+                    Parameter P_DisplayUnDeliveredQtyNew {
+                        IndexDomain: (dcd,SKU);
+                    }
+                    StringParameter P_DisplayReportSKUandDescription {
+                        IndexDomain: rsku;
+                        Definition: rsku+" ("+P_ReportSKUDescription(rsku)+")";
+                    }
+                    StringParameter P_DisplayPlantSKUDescription {
+                        IndexDomain: (pl,SKU);
+                    }
+                    Parameter P_PlantSTO {
+                        IndexDomain: (pl,rsku);
+                    }
+                    Parameter P_PlantSTONew {
+                        IndexDomain: (pl,SKU);
+                    }
+                    Parameter P_DisplayTMLandingLag {
+                        IndexDomain: (dcd,SKU);
+                    }
+                    Parameter P_DisplayToOrder {
+                        IndexDomain: (dcd,SKU);
+                    }
+                    StringParameter P_OverSold {
+                        IndexDomain: (dcd,SKU);
+                    }
+                    Parameter P_Ishidden {
+                        IndexDomain: (dcd,SKU);
+                    }
+                    Parameter P_DisplayLag3FCSTMPlus1 {
+                        IndexDomain: (dcd,SKU);
+                    }
+                    Parameter P_DisplayCoverageDaysUnres {
+                        IndexDomain: (dcd,SKU);
+                    }
+                    Parameter P_DisplayCoverageDaysAll {
+                        IndexDomain: (dcd,SKU);
+                    }
+                    Parameter P_DisplayAlert1 {
+                        IndexDomain: (dcd,SKU);
+                    }
+                    ElementParameter P_DisplayColor1 {
+                        IndexDomain: (dcd,SKU);
+                        Range: AllColors;
+                    }
+                    Parameter P_DisplayAlert2 {
+                        IndexDomain: (dcd,SKU);
+                    }
+                    ElementParameter P_DisplayColor2 {
+                        IndexDomain: (dcd,SKU);
+                        Range: AllColors;
+                    }
+                    Parameter P_ToBeSold {
+                        IndexDomain: (dcd,SKU);
+                    }
+                    Parameter P_Percentage1 {
+                        InitialData: 0.25;
+                    }
+                    Parameter P_Percentage2 {
+                        InitialData: 0.75;
+                    }
+                    Parameter P_Percentage3 {
+                        InitialData: 1.5;
+                    }
+                    Parameter P_DisplayPercentage1 {
+                        InitialData: 0.25;
+                    }
+                    Parameter P_DisplayPercentage2 {
+                        InitialData: 0.75;
+                    }
+                    Parameter P_DisplayPercentage3 {
+                        InitialData: 1.5;
+                    }
+                }
+                DeclarationSection AnalysisOfSales {
+                    ElementParameter P_EarliestOrderDate {
+                        Range: Cal_Days;
+                    }
+                    ElementParameter P_LatestOrderDate {
+                        Range: Cal_Days;
+                    }
+                    ElementParameter P_DisplayStartDate1 {
+                        Range: Cal_Days;
+                    }
+                    ElementParameter P_DisplayEndDate1 {
+                        Range: Cal_Days;
+                    }
+                    ElementParameter P_ReportSelectedSKUCategory {
+                        Range: S_SKUCategory;
+                    }
+                    Parameter P_DisplayReportSkuDCPercentageInAOS {
+                        IndexDomain: (rsku,DC);
+                    }
+                    Parameter P_DisplaySkuDCPercentageInAOS {
+                        IndexDomain: (SKU,DC);
+                    }
+                    Parameter P_DisplayReportSkuTotalInAOS {
+                        IndexDomain: (rsku);
+                    }
+                    Parameter P_DisplaySkuTotalInAOS {
+                        IndexDomain: (SKU);
+                    }
+                    Parameter P_DisplayReportSkuDCTotalInAOS {
+                        IndexDomain: (rsku, DC);
+                    }
+                    Parameter P_DisplaySkuDCTotalInAOS {
+                        IndexDomain: (SKU,DC);
+                    }
+                    ElementParameter P_DisplayReportSkuPlant {
+                        IndexDomain: rsku;
+                        Range: S_Plant;
+                    }
+                    ElementParameter P_DisplaySkuPlant {
+                        IndexDomain: (SKU);
+                        Range: S_Plant;
+                    }
+                    StringParameter P_DisplayReportSKUDescription {
+                        IndexDomain: rsku;
+                    }
+                    StringParameter P_DisplaySKUDescription3 {
+                        IndexDomain: (SKU);
+                    }
+                    Parameter P_DisplayReportSkuWeekPercentageInAOS {
+                        IndexDomain: (rsku,w);
+                    }
+                    Parameter P_DisplaySkuWeekPercentageInAOS {
+                        IndexDomain: (SKU,w);
+                    }
+                    Parameter P_DisplayReportSkuWeekTotalInAOS {
+                        IndexDomain: (rsku, w);
+                    }
+                    Parameter P_DisplaySkuWeekTotalInAOS {
+                        IndexDomain: (SKU,w);
+                    }
+                    Parameter P_DisplayReportSkuRegionPercentageInAOS {
+                        IndexDomain: (rsku,re);
+                    }
+                    Parameter P_DisplaySkuRegionPercentageInAOS {
+                        IndexDomain: (SKU,re);
+                    }
+                    Parameter P_DisplayReportSkuRegionTotalInAOS {
+                        IndexDomain: (rsku, re);
+                    }
+                    Parameter P_DisplaySkuRegionTotalInAOS {
+                        IndexDomain: (SKU,re);
+                    }
+                }
+                DeclarationSection AnalysisOfSTO {
+                    ElementParameter P_DisplayStartDate2 {
+                        Range: Cal_Days;
+                    }
+                    ElementParameter P_DisplayEndDate2 {
+                        Range: Cal_Days;
+                    }
+                    StringParameter P_DisplayReportSKUDescription2 {
+                        IndexDomain: rsku;
+                    }
+                    StringParameter P_DisplaySKUDescription22 {
+                        IndexDomain: (SKU);
+                    }
+                    ElementParameter P_DisplayReportSkuPlant2 {
+                        IndexDomain: rsku;
+                        Range: S_Plant;
+                    }
+                    ElementParameter P_DisplaySkuPlant22 {
+                        IndexDomain: (SKU);
+                        Range: S_Plant;
+                    }
+                    Parameter P_DisplayReportSkuDCQty {
+                        IndexDomain: (rsku, dcd);
+                    }
+                    Parameter P_DisplaySkuDCQty {
+                        IndexDomain: (SKU,dcd);
+                    }
+                    Parameter P_DisplayFrequencyReportSkuDC {
+                        IndexDomain: (rsku, dcd);
+                    }
+                    Parameter P_DisplayFrequencySkuDC {
+                        IndexDomain: (SKU,dcd);
+                    }
+                }
+                Procedure ConfigureRun {
+                    Body: {
+                        P_Percentage1 := P_DisplayPercentage1;
+                        P_Percentage2 := P_DisplayPercentage2;
+                        P_Percentage3 := P_DisplayPercentage3;
+                        
+                        !PopulateDailyInventoryReport;
+                        
+                        empty P_DisplayColor1;
+                        for ((dcd, SKU) | P_IsDCServingSKU(P_DCofDCDivision(dcd), SKU) = 1) do
+                        	if (P_AvailableStockNew(dcd, SKU) < P_DisplayUnDeliveredQtyNew(dcd, SKU)) then
+                        		P_DisplayColor1(dcd, SKU) := 'Black';
+                        	elseif(P_AvailableStockNew(dcd, SKU) >= P_DisplayUnDeliveredQtyNew(dcd, SKU)
+                        		and P_AvailableStockNew(dcd, SKU) <= P_ToBeSold(dcd, SKU) * P_Percentage1) then
+                        		P_DisplayColor1(dcd, SKU) := 'Red';
+                        	elseif(P_AvailableStockNew(dcd, SKU) >= P_DisplayUnDeliveredQtyNew(dcd, SKU)
+                        		and P_AvailableStockNew(dcd, SKU) > P_ToBeSold(dcd, SKU) * P_Percentage1
+                        		and P_AvailableStockNew(dcd, SKU) <= P_ToBeSold(dcd, SKU) * P_Percentage2) then
+                        		P_DisplayColor1(dcd, SKU) := 'Yellow';
+                        	elseif(P_AvailableStockNew(dcd, SKU) >= P_DisplayUnDeliveredQtyNew(dcd, SKU)
+                        		and P_AvailableStockNew(dcd, SKU) > P_ToBeSold(dcd, SKU) * P_Percentage2
+                        		and P_AvailableStockNew(dcd, SKU) <= P_ToBeSold(dcd, SKU) * P_Percentage3) then
+                        		P_DisplayColor1(dcd, SKU) := 'Green';
+                        	elseif(P_AvailableStockNew(dcd, SKU) >= P_DisplayUnDeliveredQtyNew(dcd, SKU)
+                        		and P_AvailableStockNew(dcd, SKU) > P_ToBeSold(dcd, SKU) * P_Percentage3) then
+                        		P_DisplayColor1(dcd, SKU) := 'Magenta';
+                        	endif;
+                        endfor;
+                    }
+                }
+                Procedure ConfigureCancel {
+                    Body: {
+                        P_DisplayPercentage1 := P_Percentage1;
+                        P_DisplayPercentage2 := P_Percentage2;
+                        P_DisplayPercentage3 := P_Percentage3;
+                    }
+                }
+                Procedure AOSDisplay {
+                    Body: {
+                        empty P_EarliestOrderDate, P_LatestOrderDate;
+                        
+                        P_EarliestOrderDate := last(Cal_Days);
+                        P_LatestOrderDate := first(Cal_Days);
+                        for (od) do
+                        	if (P_OrderDay(od) < P_EarliestOrderDate) then
+                        		P_EarliestOrderDate := P_OrderDay(od);
+                        	endif;
+                        
+                        	if (P_OrderDay(od) > P_LatestOrderDate) then
+                        		P_LatestOrderDate := P_OrderDay(od);
+                        	endif;
+                        endfor;
+                        
+                        !empty P_DisplayReportSkuTotalInAOS, P_DisplayReportSkuDCTotalInAOS, P_DisplayReportSkuDCPercentageInAOS;
+                        !empty P_DisplayReportSkuWeekTotalInAOS, P_DisplayReportSkuWeekPercentageInAOS;
+                        !empty P_DisplayReportSkuRegionPercentageInAOS, P_DisplayReportSkuRegionTotalInAOS;
+                        
+                        empty P_DisplaySkuTotalInAOS, P_DisplaySkuDCTotalInAOS, P_DisplaySkuDCPercentageInAOS;
+                        empty P_DisplaySkuWeekTotalInAOS, P_DisplaySkuWeekPercentageInAOS;
+                        empty P_DisplaySkuRegionPercentageInAOS, P_DisplaySkuRegionTotalInAOS;
+                        
+                        
+                        for (od | P_OrderDay(od) >= P_DisplayStartDate1 and P_OrderDay(od) <= P_DisplayEndDate1
+                        	  and P_SKUCategoryOfSKU(P_OrderSku(od)) = P_ReportSelectedSKUCategory ) do
+                        	P_DisplaySkuTotalInAOS(P_OrderSKU(od)) := P_DisplaySkuTotalInAOS(P_OrderSKU(od)) + P_OrderQuantityRaw(od);
+                        
+                        	P_DisplaySkuDCTotalInAOS(P_OrderSKU(od), P_DCServingRegionSKU(P_OrderRegion(od), P_OrderSku(od))) := 
+                        	P_DisplaySkuDCTotalInAOS(P_OrderSKU(od), P_DCServingRegionSKU(P_OrderRegion(od), P_OrderSku(od))) + P_OrderQuantityRaw(od);
+                        
+                        	P_DisplaySkuWeekTotalInAOS(P_OrderSKU(od), P_DayToWeek(P_OrderDay(od))) :=
+                        	P_DisplaySkuWeekTotalInAOS(P_OrderSKU(od), P_DayToWeek(P_OrderDay(od))) + P_OrderQuantityRaw(od);
+                        
+                        	P_DisplaySkuRegionTotalInAOS(P_OrderSKU(od), P_OrderRegion(od)) :=
+                        	P_DisplaySkuRegionTotalInAOS(P_OrderSKU(od), P_OrderRegion(od)) +  P_OrderQuantityRaw(od);
+                        endfor;
+                        
+                        for ((SKU, DC) | P_DisplaySkuTotalInAOS(SKU) > 0)  do
+                        	P_DisplaySkuDCPercentageInAOS(SKU, DC) := 100 * P_DisplaySkuDCTotalInAOS(SKU, DC) / P_DisplaySkuTotalInAOS(SKU);
+                        endfor;
+                        
+                        for ((SKU, w) | P_DisplaySkuTotalInAOS(SKU) > 0)  do
+                        	P_DisplaySkuWeekPercentageInAOS(SKU, w) := 100 * P_DisplaySkuWeekTotalInAOS(SKU, w) / P_DisplaySkuTotalInAOS(SKU);
+                        endfor;
+                        
+                        for ((SKU, re) | P_DisplaySkuTotalInAOS(SKU) > 0)  do
+                        	P_DisplaySkuRegionPercentageInAOS(SKU, re) := 100 * P_DisplaySkuRegionTotalInAOS(SKU, re) / P_DisplaySkuTotalInAOS(SKU);
+                        endfor;
+                        
+                        !empty P_DisplayReportSkuPlant, P_DisplayReportSKUDescription;
+                        empty P_DisplaySkuPlant, P_DisplaySKUDescription3;
+                        for (SKU | P_SKUCategoryOfSKU(SKU) = P_ReportSelectedSKUCategory ) do
+                        	P_DisplaySkuPlant(SKU) := P_SKUProducingPlant(SKU);
+                        	P_DisplaySKUDescription3(SKU) := P_SKUDescription(SKU);
+                        endfor;
+                    }
+                }
+                Procedure AOSTODisplay {
+                    Body: {
+                        !empty P_DisplayReportSkuDCQty, P_DisplayFrequencyReportSkuDC;
+                        empty P_DisplaySkuDCQty, P_DisplayFrequencySkuDC;
+                        
+                        for (sto | P_StoDay(sto) >= P_DisplayStartDate2 and P_StoDay(sto) <= P_DisplayEndDate2) do
+                        	P_DisplaySkuDCQty(P_StoSKU(sto), P_StoDCDivision(sto)) :=
+                        	P_DisplaySkuDCQty(P_StoSKU(sto), P_StoDCDivision(sto)) + P_StoQuantityRaw(sto);
+                        
+                        	P_DisplayFrequencySkuDC(P_StoSKU(sto), P_StoDCDivision(sto)) :=
+                        	P_DisplayFrequencySkuDC(P_StoSKU(sto), P_StoDCDivision(sto)) + 1;
+                        endfor;
+                        
+                        !empty P_DisplayReportSkuPlant2, P_DisplayReportSKUDescription2;
+                        empty P_DisplaySkuPlant22, P_DisplaySKUDescription22;
+                        
+                        P_DisplaySkuPlant22(SKU) := P_SKUProducingPlant(SKU);
+                        P_DisplaySKUDescription22(SKU) := P_SKUDescription(SKU);
+                    }
+                }
+            }
+            DeclarationSection DisplayDataDeclaration {
+                Parameter P_DisplayWeekPercentageInAOS {
+                    IndexDomain: w;
+                }
+                ElementParameter P_DisplayProvince {
+                    Range: S_Region;
+                }
+                Parameter P_DisplayQtyOfOrders;
+                Parameter P_DisplayPercentage;
+                ElementParameter P_DisplayReportSKUInAOS2 {
+                    Range: S_ReportSKU;
+                }
+                StringParameter P_DisplayDescriptionInAOS2;
+                StringParameter P_DisplayManufactoryInAOS2;
+                ElementParameter P_DisplayDCInAOS2 {
+                    Range: S_DC;
+                }
+                Parameter P_DisplayQtyOfSTO;
+                Parameter P_DisplayFrequency;
+            }
+        }
+    }
+    Procedure MainInitialization {
+        Comment: "Add initialization statements here that do NOT require any library being initialized already.";
+    }
+    Procedure PostMainInitialization {
+        Comment: {
+            "Add initialization statements here that require that the libraries are already initialized properly,
+            or add statements that require the Data Management module to be initialized."
+        }
+    }
+    Procedure MainExecution;
+    Procedure PreMainTermination {
+        Body: {
+            return DataManagementExit();
+        }
+        Comment: {
+            "Add termination statements here that require all libraries to be still alive.
+            Return 1 if you allow the termination sequence to continue.
+            Return 0 if you want to cancel the termination sequence."
+        }
+    }
+    Procedure MainTermination {
+        Body: {
+            return 1;
+        }
+        Comment: {
+            "Add termination statements here that do not require all libraries to be still alive.
+            Return 1 to allow the termination sequence to continue.
+            Return 0 if you want to cancel the termination sequence.
+            It is recommended to only use the procedure PreMainTermination to cancel the termination sequence and let this procedure always return 1."
+        }
+    }
+}

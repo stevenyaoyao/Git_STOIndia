@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<TemplateManager>
+	<Template Name="Template" PageGUID="066111D8-91C9-468D-82FC-35AA58245DC1">
+		<Template Name="Input Data Template" PageGUID="D2830A2C-DC4E-4DD4-BF62-508F638A631F">
+			<Page Name="Input Data Page" PageGUID="4B23838C-76D5-4E48-835A-87C7D5C490D1" />
+			<Page Name="SKU" PageGUID="7BF8D334-C0E7-42D0-A25B-82652182D383" />
+			<Page Name="DC" PageGUID="610F6B3A-383B-4FFD-9C8F-109BB4516826" />
+			<Page Name="Plant" PageGUID="73293853-A79B-4651-903E-4AF94126CB84" />
+			<Page Name="Region" PageGUID="58DE992E-3546-49A3-9F75-0E3A3C3A7DE0" />
+			<Page Name="TM &amp; Forecast" PageGUID="267D9833-0E09-45A0-9E00-43CC804D9FE0" />
+			<Page Name="Order &amp; STO" PageGUID="14AEE7EF-6B08-4FBC-8DB2-91C755D3B49F" />
+			<Page Name="SG &amp; TG &amp; TM" PageGUID="109ED4E5-C31A-40AC-9603-7C22EC024840" />
+			<Page Name="Truck" PageGUID="EADAAD54-8A92-4DDB-9B80-D32F1F60D44B" />
+			<Page Name="Unit" PageGUID="792B368D-EB9E-4587-A4AE-E0DF23106253" />
+		</Template>
+		<Template Name="Parameter Setting Template" PageGUID="F043A7AB-5B24-4341-A9E4-9B28BD6865C1">
+			<Page Name="Parameter Setting Page" PageGUID="2DBB3CAF-D72A-4541-B300-92DA44C17C67" />
+		</Template>
+		<Template Name="Derived Data Template" PageGUID="2B41D7E9-52AB-4831-896D-04C2E27B4771">
+			<Page Name="Derived Data Page" PageGUID="846FFE10-06FF-45E4-9F5F-2B253CEE7E3F" />
+		</Template>
+		<Template Name="Result Template" PageGUID="1EF8A152-1123-4EBE-A003-27E58F570C40">
+			<Page Name="Result Page" PageGUID="B9CB0C63-69B1-441F-80CB-EDAD46AA74B8" />
+			<Page Name="Result - Pull" PageGUID="B5528826-CBEE-447C-B078-3D963FA226E2" />
+			<Page Name="Result - Push" PageGUID="906F00AC-C459-4475-8C48-EE3E895A1A97" />
+			<Page Name="Result - Stock Allocation Optimization" PageGUID="3944FA54-03B9-418B-81C0-712B77BC9099" />
+			<Page Name="Result - Truck Allocation Optimization" PageGUID="3DC4C4C5-3CD5-4D85-8EA6-67FBC462403C" />
+			<Page Name="Result - Final" PageGUID="F10AF607-4CE5-4462-B578-161670DD4BC1" />
+		</Template>
+		<Template Name="Report Template" PageGUID="10757C44-CA38-45CB-91DB-4FFDE8DDCE0C">
+			<Page Name="Report Page" PageGUID="18C79872-EE37-4EE3-9822-5840F994ED1D" />
+		</Template>
+	</Template>
+	<Page Name="DailyInventoryReportConfigPage" PageGUID="26928B83-B89D-453D-825A-F88DFB6566D6" />
+	<Page Name="All Data Pages" PageGUID="45076CA6-6389-4476-B6E8-AA6BFC5CAD24" />
+	<Page Name="[Data Page] P_UnitCoversionRate" PageGUID="B1086D4F-16BF-47F1-92F2-C1F884BAA579" />
+	<Page Name="[Data Page] P_TMCountryRaw" PageGUID="3F19920B-D067-42AD-8209-E52692ED93CE" Marked="true" />
+	<Page Name="[Data Page] P_TMCountryRawUnit" PageGUID="CA3B6E76-D5E4-4580-A5C8-B2B0F9276228" />
+	<Page Name="[Data Page] P_TMRegionRaw" PageGUID="943EECAD-C7C5-470E-B14A-74A3975E944C" Marked="true" />
+	<Page Name="[Data Page] P_TMRegionRawUnit" PageGUID="35C45939-85E1-4C81-8B9D-10FD5A023203" />
+	<Page Name="[Data Page] P_RawTruckTranpostationCost" PageGUID="18F4AE56-9733-42EB-A348-E9625F507AC5" />
+	<Page Name="[Data Page] P_TruckTransporationCost" PageGUID="93E12130-89A2-44A9-A34D-96E9C7FEAC03" />
+	<Page Name="[Data Page] P_MOMResult" PageGUID="F3C1EA21-8F4C-4E1F-89B8-EA37E2424AE1" />
+	<Page Name="[Data Page] P_YOYResult" PageGUID="76EFDA07-1918-42F9-ACD5-C1FF294D7956" />
+	<Page Name="[Data Page] P_RegionMOMResult" PageGUID="9D55C750-5DBA-4612-8F3C-5EE237772934" />
+	<Page Name="[Data Page] P_RegionMOMResultRatio" PageGUID="8C7E8970-1F6E-4AC9-90B9-E79617952287" />
+	<Page Name="[Data Page] P_Demand" PageGUID="74973744-7E90-435A-907B-C0D395F12447" />
+	<Page Name="[Data Page] P_SKUStorageGroup" PageGUID="531F4613-229B-4835-A940-63A2F1406305" />
+	<Page Name="[Data Page] V_HasTgReplenishment" PageGUID="C7B118A8-5254-460F-BF01-780FE880485B" />
+	<Page Name="[Data Page] V_UnsatisfiedPush" PageGUID="DF17020E-A334-4FB4-AC47-E2E569AD762A" />
+	<Page Name="[Data Page] V_Shortage2" PageGUID="151DBDAE-32CA-4CB3-A3DC-D982C0245856" />
+	<Page Name="[Data Page] V_HasSkuReplenishment" PageGUID="7F384288-E006-4659-AABC-775D3105F3C1" />
+	<Page Name="[Data Page] V_Shortage1" PageGUID="7DC64B68-AB3B-4140-8F16-01EE821F09F8" />
+	<Page Name="[Data Page] V_Replenishment" PageGUID="416D0206-C1D5-488A-9CA1-E162D06EE5D3" />
+	<Page Name="[Data Page] V_EOH" PageGUID="8342CD51-4427-4EB6-BE73-68001FF2FBC1" />
+	<Page Name="[Data Page] V_ExcessDcMaximumStockCoverageDays" PageGUID="D1F37303-ACF0-4922-8721-92BDF68D922A" />
+	<Page Name="[Data Page] P_DcCurrentStock" PageGUID="9F5F4CCA-4346-4A3E-AF76-85960FBCDC5A" />
+	<Page Name="[Data Page] P_Replenishment" PageGUID="71F4602D-D30E-4070-888E-BA683892BCBC" />
+	<Page Name="[Data Page] P_ReplenishmentUnit" PageGUID="E45402E6-39B6-4485-AF46-70B2514C5DA9" />
+	<Page Name="[Data Page] P_SKUTransportationGroup" PageGUID="803C3973-81A8-493F-8922-396C8A2DBB9C" />
+	<Page Name="[Data Page] P_IsDCServingSKU" PageGUID="4B7D4DC8-7047-4B78-BAD9-BE0A53433098" />
+	<Page Name="[Data Page] V_SKUQuantity" PageGUID="973589F4-0E98-47D8-9CAF-E92746A6B3AE" />
+	<Page Name="[Data Page] V_TGQuantity" PageGUID="E756F670-2A3F-4D53-AD2A-FB7A800A19FB" />
+	<Page Name="[Data Page] V_UnSatisfiedReplenishement" PageGUID="F02C15AE-0383-44EC-9E2C-20B2E5D87185" />
+	<Page Name="[Data Page] V_Allocate" PageGUID="81E2AC57-EB89-49F3-8C9B-CF7C14D78A4B" />
+	<Page Name="[Data Page] P_Allocate" PageGUID="39B25EB9-F5BC-4862-9D6C-E64D0CD0F86A" />
+	<Page Name="[Data Page] P_TGQuantity" PageGUID="37DA39A9-4576-4E47-A860-EB2965DCB9A8" />
+	<Page Name="[Data Page] P_SKUQuantity" PageGUID="74E83C07-5DB9-4CBB-956B-B90F7B646C6E" />
+	<Page Name="[Data Page] P_DisplayDaysofSupply" PageGUID="43781A13-87EA-4D23-8C7E-5C6828F90A23" />
+	<Page Name="[Data Page] P_UnitOfTGQuantity" PageGUID="D08450E9-9535-4736-88B3-14AC64D1CE3B" />
+	<Page Name="[Data Page] P_RegionYOYResultRatio" PageGUID="F8881CA1-3B91-41C0-9886-3D87DEAA1CCF" />
+	<Page Name="[Data Page] P_DisplayDescriptionNew" PageGUID="678D00A5-A94B-4D6D-87AB-C684DF94C9C0" />
+	<Page Name="[Data Page] P_MOMResultRatio" PageGUID="5D31B924-6899-4A62-9E73-56656AAE386F" />
+	<Page Name="[Data Page] V_UserFixSlack" PageGUID="BB1B5C9C-2AC4-494E-8BBD-56F0C28CACF0" />
+	<Page Name="[Data Page] V_UserFixExcess" PageGUID="4B09AB85-8E9F-4280-9C76-745F3B59CE11" />
+	<Page Name="[Data Page] P_UserFixedSTORawQuantity" PageGUID="38C6513E-032C-465F-9EE9-71B3AE2BD518" />
+	<Page Name="[Data Page] P_UserFixedSTO" PageGUID="C13F420B-71EA-4485-9E29-43CD175154B5" />
+	<Page Name="[Data Page] P_UserFixedSTORawUnit" PageGUID="A8B004F2-E326-479D-A022-24B55BFDF151" />
+	<Page Name="Percentage" PageGUID="04415FA7-DF83-41B1-9CE0-96269F04CF92" />
+</TemplateManager>

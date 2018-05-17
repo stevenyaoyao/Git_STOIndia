@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<Page Version="4000" TimeStamp="2017-09-27 16:49:09" NeedsCompiledModel="false">
+	<PageEditSize Type="Inherited" />
+	<ProjectUUID>E84847FF-905F-4123-AFB1-4D6412EC0322</ProjectUUID>
+	<TemplatesTabOrderPosition>1</TemplatesTabOrderPosition>
+	<Background Inherited="true" />
+	<PageObject Type="Navigation Object">
+		<Location top="108" left="30" bottom="150" right="1410" />
+		<TabOrder>2</TabOrder>
+		<Font GUID="85AF0945-BD68-4111-87E6-40ADCCC96AA8" Name="SubMenu" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<Display>Text</Display>
+		<Spacing>6</Spacing>
+		<BackgroundColor RGB="#9dc0e3" />
+		<TextColor RGB="#ffffff" />
+		<InputColor RGB="#0000ff" />
+		<NavigationData>
+			<ReferencePage>Other</ReferencePage>
+			<OtherPage PageGUID="B9CB0C63-69B1-441F-80CB-EDAD46AA74B8" Name="Result Page" />
+			<NumberOfGenerations>1</NumberOfGenerations>
+			<Horizontally>true</Horizontally>
+		</NavigationData>
+	</PageObject>
+	<UsedReferences>
+		<Model />
+	</UsedReferences>
+</Page>

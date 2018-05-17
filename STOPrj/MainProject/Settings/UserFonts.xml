@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<UserFonts>
+	<UserFont Name="Main" FaceName="Arial Narrow" PointSize="100" Bold="true" UUID="00000000-0000-0000-0000-000000000001" />
+	<UserFont Name="SubMenu" FaceName="Arial Narrow" PointSize="120" Bold="true" UUID="85AF0945-BD68-4111-87E6-40ADCCC96AA8" InternalID="1" />
+	<UserFont Name="MainMenu" FaceName="Arial Narrow" PointSize="160" Bold="true" UUID="0FEB213B-8286-4601-88AC-B87294A1E98F" InternalID="2" />
+	<UserFont Name="Title" FaceName="Arial Narrow" PointSize="120" Bold="true" UUID="AD2A233D-E6C9-4BB2-87A9-72852CA2B19B" InternalID="3" />
+	<UserFont Name="Button" FaceName="Arial Narrow" PointSize="120" Bold="true" UUID="0D87C587-62E1-43BE-9144-454FE3253620" InternalID="4" />
+	<UserFont Name="SubTitle" FaceName="Arial Narrow" PointSize="120" Bold="true" UUID="6862C826-4789-416E-B615-6DFEB5D23AD5" InternalID="5" />
+	<UserFont Name="Text1" FaceName="Arial Narrow" PointSize="110" Bold="true" UUID="85FE5B0E-3C22-4BBB-8DD6-9B1FA73B62ED" InternalID="6" />
+</UserFonts>
